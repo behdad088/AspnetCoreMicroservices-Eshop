@@ -1,0 +1,39 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Basket.Grpc.Protos";
+
+service BasketProtoService {
+    rpc GetBasket (GetBasketRequest) returns (ShoppingCartModel);
+    rpc UpdateBasket (UpdateBasketRequest) returns (ShoppingCartModel);
+    rpc DeletetBasket (DeletetBasketRequest) returns (DeletetBasketResponse);
+}
+
+message ShoppingCartModel {
+	string userName = 1;
+    repeated ShoppingCartItemModel items = 2; 
+	int32 totalPrice =3;
+}
+
+message ShoppingCartItemModel {
+	int32 quantity = 1;
+    string color = 2;
+    int32 price = 3;
+    string productId = 4;
+    string productName = 5;
+}
+
+message GetBasketRequest {
+    string userName = 1;
+}
+
+message UpdateBasketRequest {
+    ShoppingCartModel shoppingCart = 1;
+}
+
+message DeletetBasketRequest {
+    string userName = 1;
+}
+
+message DeletetBasketResponse {
+
+}
