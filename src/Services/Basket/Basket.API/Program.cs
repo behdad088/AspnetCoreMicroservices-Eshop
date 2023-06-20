@@ -1,13 +1,16 @@
+using Basket.API.Grpc;
 using Basket.API.Models.Configs;
 using Basket.API.Repositories;
 using Discount.Grpc.Protos;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddGrpc();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -35,7 +38,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthorization();
-
+app.MapGrpcService<BasketService>();
 app.MapControllers();
 
 app.Run();
