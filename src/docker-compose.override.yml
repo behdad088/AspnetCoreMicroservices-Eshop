@@ -43,10 +43,13 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - "DatabaseSettings:ConnectionString=mongodb://catalogdb:27017"
+      - Kestrel__Endpoints__HTTP__Url=http://0.0.0.0:80
+      - Kestrel__Endpoints__GRPC__Url=http://0.0.0.0:81
     depends_on:
       - catalogdb
     ports:
       - "8000:80"
+      - "9000:81" 
 
   basket.api:
     container_name: basket.api
