@@ -3,27 +3,27 @@ using System.Linq.Expressions;
 
 namespace Ordering.Application.Contracts.Persistence
 {
-    public interface IRepositoryBase<T> where T : EntityBase
+    public interface IRepositoryBase<TEntity> where TEntity : EntityBase
     {
-        Task<IReadOnlyList<T>> GetAllAsync();
+        Task<IReadOnlyList<TEntity>> GetAllAsync();
 
-        Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate);
+        Task<IReadOnlyList<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate);
 
-        Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate = null,
-                                        Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+        Task<IReadOnlyList<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate = null,
+                                        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
                                         string includeString = null,
                                         bool disableTracking = true);
 
-        Task<IReadOnlyList<T>> GetAsync(Expression<Func<T, bool>> predicate = null,
-                                       Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
-                                       List<Expression<Func<T, object>>> includes = null,
+        Task<IReadOnlyList<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate = null,
+                                       Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+                                       List<Expression<Func<TEntity, object>>> includes = null,
                                        bool disableTracking = true);
-        Task<T?> GetByIdAsync(int id);
+        Task<TEntity?> GetByIdAsync(int id);
 
-        Task<T> AddAsync(T entity);
+        Task<TEntity> AddAsync(TEntity entity);
 
-        Task UpdateAsync(T entity);
+        Task UpdateAsync(TEntity entity);
 
-        Task DeleteAsync(T entity);
+        Task DeleteAsync(TEntity entity);
     }
 }
