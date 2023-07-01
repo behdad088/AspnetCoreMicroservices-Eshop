@@ -26,6 +26,8 @@ namespace Ordering.Application.Features.Orders.Commands.CheckoutOrder
         public async Task<int> Handle(CheckoutOrderCommand request, CancellationToken cancellationToken)
         {
             var orderEntity = _mapper.Map<Order>(request);
+            orderEntity.CreatedBy = orderEntity.UserName;
+
             var newOrder = await _orderRepository.AddAsync(orderEntity);
 
             _logger.LogInformation($"Order {newOrder.Id} is successfully created.");
@@ -35,7 +37,7 @@ namespace Ordering.Application.Features.Orders.Commands.CheckoutOrder
 
         private async Task SendMailAsync(Order order)
         {
-            var email = new Email() { To = "ezozkme@gmail.com", Body = $"Order was created.", Subject = "Order was created" };
+            var email = new Email() { To = order.EmailAddress, Body = $"Order was created.", Subject = "Order was created" };
 
             try
             {
@@ -44,7 +46,7 @@ namespace Ordering.Application.Features.Orders.Commands.CheckoutOrder
             catch (Exception ex)
             {
                 _logger.LogError($"Order {order.Id} failed due to an error with the mail service: {ex.Message}");
-                await _orderRepository.DeleteAsync(order);
+                //await _orderRepository.DeleteAsync(order);
             }
         }
     }

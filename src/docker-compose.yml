@@ -13,6 +13,9 @@ services:
   pgadmin:
     image: dpage/pgadmin4
 
+  orderdb:
+    image: mcr.microsoft.com/mssql/server:2017-latest
+
   catalog.api:
     image: ${DOCKER_REGISTRY-}catalogapi
     build:
@@ -34,4 +37,4 @@ services:
 volumes:
   mongo_data:
   postgres_data:
-  pgadmin_data:  
+  pgadmin_data:
