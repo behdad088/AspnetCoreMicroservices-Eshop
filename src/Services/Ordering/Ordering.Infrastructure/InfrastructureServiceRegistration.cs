@@ -17,7 +17,6 @@ namespace Ordering.Infrastructure
             services.AddDbContext<OrderContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("OrderingConnectionString")));
 
-            services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
             services.AddScoped<IOrderRepository, OrderRepository>();
 
             services.Configure<EmailSettings>(c => configuration.GetSection("EmailSettings"));
