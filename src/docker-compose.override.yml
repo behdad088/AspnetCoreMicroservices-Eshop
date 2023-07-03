@@ -92,8 +92,11 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__OrderingConnectionString=Server=orderdb,1433;Database=OrderDb;User Id=sa;Password=BeH007826790;TrustServerCertificate=true
+      - Kestrel__Endpoints__HTTP__Url=http://0.0.0.0:80
+      - Kestrel__Endpoints__GRPC__Url=http://0.0.0.0:81
     depends_on:
       - orderdb
     ports:
       - "8003:80"
+      - "9003:81" 
 
