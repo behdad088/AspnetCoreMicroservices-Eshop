@@ -9,7 +9,7 @@ service BasketProtoService {
 }
 
 message ShoppingCartModel {
-	string userName = 1;
+	string username = 1;
     repeated ShoppingCartItemModel items = 2; 
 	int32 totalPrice =3;
 }
@@ -23,7 +23,7 @@ message ShoppingCartItemModel {
 }
 
 message GetBasketRequest {
-    string userName = 1;
+    string username = 1;
 }
 
 message UpdateBasketRequest {
@@ -31,7 +31,7 @@ message UpdateBasketRequest {
 }
 
 message DeletetBasketRequest {
-    string userName = 1;
+    string username = 1;
 }
 
 message DeletetBasketResponse {

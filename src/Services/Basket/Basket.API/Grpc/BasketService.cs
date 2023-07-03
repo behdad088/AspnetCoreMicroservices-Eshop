@@ -27,9 +27,9 @@ namespace Basket.API.Grpc
 
         public override async Task<ShoppingCartModel> GetBasket(GetBasketRequest request, ServerCallContext context)
         {
-            var basket = await _repository.GetBasketAsync(request.UserName);
-            basket ??= new Entities.ShoppingCart(request.UserName);
-            _logger.LogInformation("Basket is retrieved for Username : {Username}", request.UserName);
+            var basket = await _repository.GetBasketAsync(request.Username);
+            basket ??= new Entities.ShoppingCart(request.Username);
+            _logger.LogInformation("Basket is retrieved for Username : {Username}", request.Username);
 
             var shoppingCartModel = _mapper.Map<ShoppingCartModel>(basket);
             return shoppingCartModel;
@@ -54,7 +54,7 @@ namespace Basket.API.Grpc
 
         public override async Task<DeletetBasketResponse> DeletetBasket(DeletetBasketRequest request, ServerCallContext context)
         {
-            await _repository.DeleteBasketAsync(request.UserName);
+            await _repository.DeleteBasketAsync(request.Username);
             return new DeletetBasketResponse();
         }
     }
