@@ -11,7 +11,7 @@ service OrderProtoService {
 }
 
 message GetOredrsRequest {
-	string userName = 1;
+	string username = 1;
 }
 
 message GetOredrsResponse {
@@ -25,7 +25,7 @@ message OrderId {
 
 message OrderViewModel {
 	int32 id = 1;
-    string userName = 2;
+    string username = 2;
     int32 totalPrice = 3;
 
       // BillingAddress
@@ -46,7 +46,7 @@ message OrderViewModel {
 }
 
 message CheckoutViewModel {
-    string userName = 1;
+    string username = 1;
     int32 totalPrice = 2;
 
       // BillingAddress

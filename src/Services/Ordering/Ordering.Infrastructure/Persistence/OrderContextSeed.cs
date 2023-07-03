@@ -20,7 +20,7 @@ namespace Ordering.Infrastructure.Persistence
             return new List<Order>
             {
                 new Order() {
-                    UserName = "behdad",
+                    Username = "behdad",
                     FirstName = "behdad",
                     LastName = "kardgar",
                     EmailAddress = "behdad@gmail.com",

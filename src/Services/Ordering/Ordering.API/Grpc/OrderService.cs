@@ -25,8 +25,8 @@ namespace Ordering.API.Grpc
 
         public override async Task<GetOredrsResponse> GetOrders(GetOredrsRequest request, ServerCallContext context)
         {
-            _logger.LogInformation("Getting orders for user by Username:{Username}", request.UserName);
-            var query = new GetOrdersListQuery(request.UserName);
+            _logger.LogInformation("Getting orders for user by Username:{Username}", request.Username);
+            var query = new GetOrdersListQuery(request.Username);
             var orders = await _mediator.Send(query);
             var orderViewModel = _mapper.Map<List<OrderViewModel>>(orders);
             var result = new GetOredrsResponse();
@@ -36,7 +36,7 @@ namespace Ordering.API.Grpc
 
         public override async Task<OrderId> CheckoutOrder(CheckoutViewModel request, ServerCallContext context)
         {
-            _logger.LogInformation("checkout orders for user by Username:{Username}", request.UserName);
+            _logger.LogInformation("checkout orders for user by Username:{Username}", request.Username);
             var checkoutOrderCommand = _mapper.Map<CheckoutOrderCommand>(request);
             var orderId = await _mediator.Send(checkoutOrderCommand);
             var result = new OrderId
@@ -49,7 +49,7 @@ namespace Ordering.API.Grpc
 
         public override async Task<Empty> UpdateOrder(OrderViewModel request, ServerCallContext context)
         {
-            _logger.LogInformation("Update order for user by Username:{Username}", request.UserName);
+            _logger.LogInformation("Update order for user by Username:{Username}", request.Username);
             var updateOrderCommand = _mapper.Map<UpdateOrderCommand>(request);
             await _mediator.Send(updateOrderCommand);
             return new Empty();
