@@ -1,0 +1,67 @@
+﻿syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+option csharp_namespace = "Order.Grpc.Protos";
+
+service OrderProtoService {
+    rpc GetOrders (GetOredrsRequest) returns (GetOredrsResponse);
+    rpc CheckoutOrder (CheckoutViewModel) returns (OrderId);
+    rpc UpdateOrder (OrderViewModel) returns (google.protobuf.Empty);
+    rpc DeleteOrder (OrderId) returns (google.protobuf.Empty);
+}
+
+message GetOredrsRequest {
+	string userName = 1;
+}
+
+message GetOredrsResponse {
+    repeated OrderViewModel orders = 1;
+}
+
+
+message OrderId {
+    int32 id = 1;
+}
+
+message OrderViewModel {
+	int32 id = 1;
+    string userName = 2;
+    int32 totalPrice = 3;
+
+      // BillingAddress
+    string firstName = 4;
+    string lastName = 5;
+    string emailAddress = 6;
+    string addressLine = 7;
+    string country = 8;
+    string state = 9;
+    string zipCode = 10;
+
+     // Payment
+    string cardName = 11;
+    string cardNumber = 12;
+    string expiration = 13;
+    string cvv = 14;
+    int32 paymentMethod = 15;
+}
+
+message CheckoutViewModel {
+    string userName = 1;
+    int32 totalPrice = 2;
+
+      // BillingAddress
+    string firstName = 3;
+    string lastName = 4;
+    string emailAddress = 5;
+    string addressLine = 6;
+    string country = 7;
+    string state = 8;
+    string zipCode = 9;
+
+     // Payment
+    string cardName = 10;
+    string cardNumber = 11;
+    string expiration = 12;
+    string cvv = 13;
+    int32 paymentMethod = 14;
+}
