@@ -1,19 +1,32 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: Basket API
+name: Basket API CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "*" ]
+    paths:
+    - src/Services/Basket/**
+    - .github/workflows/basket-api.yml
+
   pull_request:
     branches: [ "main" ]
+    paths:
+    - src/Services/Basket/**
+    - .github/workflows/basket-api.yml
+
+env:
+  SERVICE: basket-api
+  IMAGE: basket.api
+    
+    
+
 
 jobs:
+
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
@@ -21,8 +34,8 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
+      working-directory: ./src/Services/Basket
       run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
+    - name: Run Tests
+      working-directory: ./src/Services/Basket
       run: dotnet test --no-build --verbosity normal
