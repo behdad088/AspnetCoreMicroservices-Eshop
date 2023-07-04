@@ -40,3 +40,10 @@ jobs:
     - name: Run Tests
       working-directory: src/Services/Basket/Basket.API
       run: dotnet test --no-build --verbosity normal
+    - name: Compose build $SERVICE
+      shell: bash
+      run: sudo -E docker-compose build $SERVICE
+      working-directory: ./src
+      env:
+         TAG: ${{ env.BRANCH }}
+         REGISTRY: ${{ inputs.registry_endpoint }}
