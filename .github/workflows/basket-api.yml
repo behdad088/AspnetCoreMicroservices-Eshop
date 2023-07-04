@@ -35,8 +35,8 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
-      working-directory: src/Services/Basket
+      working-directory: src/Services/Basket/Basket.API
       run: dotnet restore
     - name: Run Tests
-      working-directory: src/Services/Basket
+      working-directory: src/Services/Basket/Basket.API
       run: dotnet test --no-build --verbosity normal
