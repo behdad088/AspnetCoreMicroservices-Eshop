@@ -18,7 +18,7 @@ on:
     - .github/workflows/basket-api.yml
 
 env:
-  SERVICE: basket-api
+  SERVICE: basket.api
   IMAGE: basket.api
     
     
