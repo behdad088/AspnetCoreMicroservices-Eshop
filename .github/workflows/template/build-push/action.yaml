@@ -17,7 +17,7 @@ inputs:
   dockerhub_username:
     description: "Docker hub username"
     required: true
-  dockerhub_token: "docker hub token"
+  dockerhub_token:
     description: "Docker hub token"
     required: true
   # test_path:
