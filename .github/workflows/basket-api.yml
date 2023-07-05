@@ -20,7 +20,7 @@ on:
 env:
   SERVICE: basket.api
   IMAGE: basket.api
-    
+  ServicePath: src/Services/Basket/Basket.API
     
 
 jobs:
@@ -35,10 +35,10 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
-      working-directory: src/Services/Basket/Basket.API
+      working-directory: ${{ env.ServicePath }}
       run: dotnet restore
     - name: Run Tests
-      working-directory: src/Services/Basket/Basket.API
+      working-directory: ${{ env.ServicePath }}
       run: dotnet test --no-build --verbosity normal
 
     - name: Set up QEMU
@@ -55,7 +55,7 @@ jobs:
       id: docker_meta
       uses: docker/metadata-action@v4
       with:
-          images: behdadkardgar/basket.api
+          images: behdadkardgar/${{ env.IMAGE }}
           flavor: |
             latest=false
           tags: |
@@ -68,7 +68,7 @@ jobs:
       uses: docker/build-push-action@v4
       with:
           context: ./src/
-          file: src/Services/Basket/Basket.API/Dockerfile
+          file: ${{ env.ServicePath }}/Dockerfile
           push: true
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
