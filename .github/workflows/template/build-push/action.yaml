@@ -14,6 +14,12 @@ inputs:
   project_path:
     description: "Project path"
     required: true
+  dockerhub_username:
+    description: "Docker hub username"
+    required: true
+  dockerhub_token: "docker hub token"
+    description: "Docker hub token"
+    required: true
   # test_path:
   #   description: "Project test path"
 
@@ -41,8 +47,8 @@ runs:
     - name: Login to Docker Hub
       uses: docker/login-action@v2
       with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ inputs.dockerhub_username }}
+          password: ${{ inputs.dockerhub_token }}
           
     - name: Docker meta
       id: docker_meta

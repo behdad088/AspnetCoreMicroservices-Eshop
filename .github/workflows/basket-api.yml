@@ -37,5 +37,7 @@ jobs:
         image_name: ${{ env.IMAGE }}
         registry_username: ${{ env.RegistryUsername }}
         project_path: ${{ env.ProjectPath }}
+        dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+        dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
 
 
