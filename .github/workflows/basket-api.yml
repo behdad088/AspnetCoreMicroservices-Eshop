@@ -21,6 +21,7 @@ env:
   SERVICE: basket.api
   IMAGE: basket.api
   ServicePath: src/Services/Basket/Basket.API
+  RegistryUsername: behdadkardgar
     
 
 jobs:
@@ -55,7 +56,7 @@ jobs:
       id: docker_meta
       uses: docker/metadata-action@v4
       with:
-          images: behdadkardgar/${{ env.IMAGE }}
+          images: ${{ env.RegistryUsername/env.IMAGE }}
           flavor: |
             latest=false
           tags: |
