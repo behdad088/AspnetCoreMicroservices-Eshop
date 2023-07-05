@@ -45,6 +45,7 @@ runs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           
     - name: Docker meta
+      shell: bash
       id: docker_meta
       uses: docker/metadata-action@v4
       with:
@@ -58,6 +59,7 @@ runs:
             type=semver,pattern={{version}}
             
     - name: Build and push ${{ inputs.service }}
+      shell: bash
       uses: docker/build-push-action@v4
       with:
           context: ./src/
