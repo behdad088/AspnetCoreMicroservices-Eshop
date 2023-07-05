@@ -54,7 +54,7 @@ jobs:
       id: docker_meta
       uses: docker/metadata-action@v4
       with:
-          images: behdadkardgar/$SERVICE
+          images: behdadkardgar/basket.api
           flavor: |
             latest=false
           tags: |
