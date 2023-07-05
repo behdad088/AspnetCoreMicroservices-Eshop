@@ -56,7 +56,7 @@ jobs:
       id: docker_meta
       uses: docker/metadata-action@v4
       with:
-          images: ${{ env.RegistryUsername/ }}/${{ env.IMAGE }}
+          images: ${{ env.RegistryUsername }}/${{ env.IMAGE }}
           flavor: |
             latest=false
           tags: |
