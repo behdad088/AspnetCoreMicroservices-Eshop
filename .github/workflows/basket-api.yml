@@ -67,7 +67,7 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v4
       with:
-          #context: ./GraphQLAPI/
+          context: src/Services/Basket/Basket.API
           file: src/Services/Basket/Basket.API/Dockerfile
           push: true
           tags: ${{ steps.docker_meta.outputs.tags }}
