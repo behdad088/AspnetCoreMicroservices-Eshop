@@ -31,7 +31,7 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-    - uses: ./.github/workflows/template/build-push
+    - uses: ./.github/workflows/composite/build-push
       with: 
         service: ${{ env.SERVICE }}
         image_name: ${{ env.IMAGE }}
