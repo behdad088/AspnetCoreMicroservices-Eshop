@@ -1,0 +1,104 @@
+name: "Build and push image"
+description: "Builds and pushes an image to a registry"
+
+inputs:
+  service:
+    description: "Service to build"
+    required: true
+  image_name:
+    description: "Name of image"
+    required: true
+  registry_username:
+    description: "Registry username"
+    required: true
+  project_path:
+    description: "Project path"
+    required: true
+  dockerhub_username:
+    description: "Docker hub username"
+    required: true
+  dockerhub_token:
+    description: "Docker hub token"
+    required: true
+  test_path:
+    description: "Project test path"
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      shell: bash
+      working-directory: ${{ inputs.project_path }}
+      run: dotnet restore
+    - name: Run Tests
+      shell: bash
+      if: ${{ inputs.test_path != '' }}
+      working-directory: ${{ inputs.test_path }}
+      run: dotnet test --no-build --verbosity normal
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+          username: ${{ inputs.dockerhub_username }}
+          password: ${{ inputs.dockerhub_token }}
+          
+    - name: Docker meta
+      id: docker_meta
+      uses: docker/metadata-action@v4
+      with:
+          images: ${{ inputs.registry_username }}/${{ inputs.image_name }}
+          flavor: |
+            latest=false
+          tags: |
+            type=raw,value=latest,enable=${{ endsWith(github.ref, github.event.repository.default_branch) }}
+            type=ref,event=pr
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            
+    - name: Build and push ${{ inputs.service }}
+      uses: docker/build-push-action@v4
+      with:
+          context: ./src/
+          file: ${{ inputs.project_path }}/Dockerfile
+          push: true
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64, linux/arm64
+    
+    - name: Find comment for image tags
+      uses: peter-evans/find-comment@v2
+      if: github.event_name == 'pull_request'
+      id: fc
+      with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: Docker image tag(s) pushed
+      
+        # If PR, put image tags in the PR comments
+    - name: Create or update comment for image tags
+      uses: peter-evans/create-or-update-comment@v2
+      if: github.event_name == 'pull_request'
+      with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Docker image tag(s) pushed:
+            ```text
+            ${{ steps.docker_meta.outputs.tags }}
+            ```
+            Labels added to images:
+            ```text
+            ${{ steps.docker_meta.outputs.labels }}
+            ```
+          edit-mode: replace
