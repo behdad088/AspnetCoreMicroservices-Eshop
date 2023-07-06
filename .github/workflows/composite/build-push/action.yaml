@@ -20,8 +20,8 @@ inputs:
   dockerhub_token:
     description: "Docker hub token"
     required: true
-  # test_path:
-  #   description: "Project test path"
+  test_path:
+    description: "Project test path"
 
 runs:
   using: "composite"
@@ -35,10 +35,10 @@ runs:
       shell: bash
       working-directory: ${{ inputs.project_path }}
       run: dotnet restore
-    # - name: Run Tests
-    #   if: $ {{ inputs.test_path != '' }}
-    #   working-directory: ${{ inputs.test_path }}
-    #   run: dotnet test --no-build --verbosity normal
+    - name: Run Tests
+      if: $ {{ inputs.test_path != '' }}
+      working-directory: ${{ inputs.test_path }}
+      run: dotnet test --no-build --verbosity normal
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
