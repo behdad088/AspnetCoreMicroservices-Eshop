@@ -74,7 +74,7 @@ runs:
           labels: ${{ steps.docker_meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64, linux/arm64
+          platforms: linux/amd64
     
     - name: Find comment for image tags
       uses: peter-evans/find-comment@v2
