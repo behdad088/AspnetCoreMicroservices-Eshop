@@ -1,26 +1,26 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: Discount API CI
+name: Ordering API CI
 
 on:
   workflow_dispatch:
   push:
     branches: [ "main" ]
     paths:
-    - src/Services/Discount/**
-    - .github/workflows/discount-api.yml
+    - src/Services/Ordering/**
+    - .github/workflows/ordering-api.yml
 
   pull_request:
     branches: [ "main" ]
     paths:
-    - src/Services/Discount/**
-    - .github/workflows/discount-api.yml
+    - src/Services/Ordering/**
+    - .github/workflows/ordering-api.yml
 
 env:
-  SERVICE: discount.api
-  IMAGE: discount.api
-  ProjectPath: src/Services/Discount/Discount.API
+  SERVICE: ordering.api
+  IMAGE: ordering.api
+  ProjectPath: src/Services/Ordering/Ordering.API
   RegistryUsername: behdadkardgar
     
 jobs:
