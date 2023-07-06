@@ -36,6 +36,7 @@ runs:
       working-directory: ${{ inputs.project_path }}
       run: dotnet restore
     - name: Run Tests
+      shell: bash
       if: $ {{ inputs.test_path != '' }}
       working-directory: ${{ inputs.test_path }}
       run: dotnet test --no-build --verbosity normal
