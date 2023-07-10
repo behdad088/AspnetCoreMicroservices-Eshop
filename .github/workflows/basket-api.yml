@@ -8,6 +8,7 @@ on:
   push:
     branches: [ "main" ]
     paths:
+    - src/BuildingBlocks/**
     - src/Services/Basket/**
     - .github/workflows/basket-api.yml
 

@@ -8,6 +8,7 @@ on:
   push:
     branches: [ "main" ]
     paths:
+    - src/BuildingBlocks/**
     - src/Services/Discount/**
     - .github/workflows/discount-api.yml
 
