@@ -16,6 +16,9 @@ services:
   orderdb:
     image: mcr.microsoft.com/mssql/server:2017-latest
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+
   catalog.api:
     image: ${DOCKER_REGISTRY-}catalogapi
     build:
@@ -44,4 +47,5 @@ volumes:
   mongo_data:
   postgres_data:
   pgadmin_data:
+  rabbitmq_data:
 
