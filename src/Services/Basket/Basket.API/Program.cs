@@ -2,8 +2,8 @@ using Basket.API.Grpc;
 using Basket.API.Models.Configs;
 using Basket.API.Repositories;
 using Discount.Grpc.Protos;
-using MassTransit;
 using Microsoft.Extensions.Options;
+using Services.Common;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -28,15 +28,8 @@ builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(
     option.Address = new Uri(discountUrl);
 });
 
-
-builder.Services.AddMassTransit(config =>
-{
-    config.UsingRabbitMq((ctx, cfg) =>
-    {
-        cfg.Host(builder.Configuration.GetValue<string>("EventBusSettings:HostAddress"));
-    });
-});
-
+builder.Services.AddRMQConnection(builder.Configuration.GetValue<string>("EventBusSettings:HostAddress"));
+builder.Services.AddRMQProducer("order", "uat", "checkout");
 
 var app = builder.Build();
 

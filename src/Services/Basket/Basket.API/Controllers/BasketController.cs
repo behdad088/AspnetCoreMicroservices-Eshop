@@ -2,8 +2,7 @@
 using Basket.API.Entities;
 using Basket.API.Repositories;
 using Discount.Grpc.Protos;
-using EventBus.Event;
-using MassTransit;
+using Eshop.BuildingBlocks.EventBus.RabbitMQ.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -15,19 +14,19 @@ namespace Basket.API.Controllers
     {
         private readonly IBasketRepository _repository;
         private readonly IMapper _mapper;
-        private readonly IPublishEndpoint _publishEndpoint;
+        private readonly IRabbitMQProducer _rabbitMQProducer;
         private readonly DiscountProtoService.DiscountProtoServiceClient _discountProtoServiceClient;
 
         public BasketController(
             IBasketRepository repository,
             DiscountProtoService.DiscountProtoServiceClient discountProtoServiceClient,
             IMapper mapper,
-            IPublishEndpoint publishEndpoint)
+            IRabbitMQProducer rabbitMQProducer)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _discountProtoServiceClient = discountProtoServiceClient ?? throw new ArgumentNullException(nameof(discountProtoServiceClient));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _publishEndpoint = publishEndpoint ?? throw new ArgumentNullException(nameof(publishEndpoint));
+            _rabbitMQProducer = rabbitMQProducer ?? throw new ArgumentNullException(nameof(rabbitMQProducer));
         }
 
         [HttpGet("{username}", Name = "GetBasket")]
@@ -73,9 +72,8 @@ namespace Basket.API.Controllers
             if (basket == null)
                 return BadRequest();
 
-            var eventMessage = _mapper.Map<BasketCheckoutEvent>(basketCheckout);
-            eventMessage.TotalPrice = basket.TotalPrice;
-            await _publishEndpoint.Publish(eventMessage);
+            basketCheckout.TotalPrice = basket.TotalPrice;
+            await _rabbitMQProducer.PublishAsJsonAsync("order.checkout", basketCheckout);
 
             await _repository.DeleteBasketAsync(basket.Username);
 
