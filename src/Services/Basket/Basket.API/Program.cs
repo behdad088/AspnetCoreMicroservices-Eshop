@@ -29,7 +29,7 @@ builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(
 });
 
 builder.Services.AddRMQConnection(builder.Configuration.GetValue<string>("EventBusSettings:HostAddress"));
-builder.Services.AddRMQProducer("order", "uat", "checkout");
+builder.Services.AddRMQProducer("uat", "order", "checkout");
 
 var app = builder.Build();
 

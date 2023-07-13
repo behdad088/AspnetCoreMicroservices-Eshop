@@ -3,11 +3,11 @@ using Eshop.BuildingBlocks.EventBus.RabbitMQ.Types;
 
 namespace Eshop.BuildingBlocks.EventBus.RabbitMQ.Abstractions
 {
-    public interface IRabbitMQConsumer : IDisposable
+    public interface IRabbitMQConsumer<T> : IDisposable
     {
-        Task SubscribeAsync(Func<IntegrationEvent, Task<ActMode>> func, CancellationToken cancellationToken);
+        Task SubscribeAsync(Func<IntegrationEvent, Task<ActMode>> func, CancellationToken cancellationToken, ushort prefetchCount = 50);
 
-        Task<string> SubscribeAsync(Func<IntegrationEvent, Task<ActMode>> func);
+        Task<string> SubscribeAsync(ushort prefetchCount, Func<IntegrationEvent, Task<ActMode>> func);
 
         Task UnsubscribeAsync(string consumerTag);
     }
