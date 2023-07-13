@@ -26,22 +26,22 @@ namespace Services.Common
             return services;
         }
 
-        public static IServiceCollection AddRMQConsumer(this IServiceCollection services, string service, string environment, string consumerName)
+        public static IServiceCollection AddRMQConsumer<T>(this IServiceCollection services, string environment, string service, string consumerName)
         {
-            services.AddSingleton<IRabbitMQConsumer>(sp =>
+            services.AddSingleton<IRabbitMQConsumer<T>>(sp =>
             {
-                return new RabbitMQConsumer(
+                return new RabbitMQConsumer<T>(
                     rabbitMQPersistentConnection: sp.GetRequiredService<IRabbitMQPersistentConnection>(),
                     service: service,
                     environment: environment,
                     consumerName: consumerName,
-                    logger: sp.GetRequiredService<ILogger<RabbitMQConsumer>>());
+                    logger: sp.GetRequiredService<ILogger<RabbitMQConsumer<T>>>());
             });
 
             return services;
         }
 
-        public static IServiceCollection AddRMQProducer(this IServiceCollection services, string service, string environment, string name)
+        public static IServiceCollection AddRMQProducer(this IServiceCollection services, string environment, string service, string name)
         {
             services.AddSingleton<IRabbitMQProducer>(sp =>
             {

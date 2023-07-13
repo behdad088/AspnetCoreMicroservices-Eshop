@@ -1,17 +1,20 @@
 ﻿using Eshop.BuildingBlocks.EventBus.RabbitMQ.Abstractions;
 using Eshop.BuildingBlocks.EventBus.RabbitMQ.Event;
+using Eshop.BuildingBlocks.EventBus.RabbitMQ.Exceptions;
 using Eshop.BuildingBlocks.EventBus.RabbitMQ.Types;
 using Microsoft.Extensions.Logging;
 using NodaTime;
+using Polly;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System.Net.Sockets;
 
 namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
 {
-    public class RabbitMQConsumer : IRabbitMQConsumer
+    public class RabbitMQConsumer<T> : IRabbitMQConsumer<T>
     {
         private readonly IRabbitMQPersistentConnection _rabbitMQPersistentConnection;
-        private readonly ILogger<RabbitMQConsumer> _logger;
+        private readonly ILogger<RabbitMQConsumer<T>> _logger;
         private readonly string _queueName;
         private IModel Channel;
         private bool IsQueueDeclared = false;
@@ -22,7 +25,7 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
             string service,
             string environment,
             string consumerName,
-            ILogger<RabbitMQConsumer> logger)
+            ILogger<RabbitMQConsumer<T>> logger)
         {
             if (string.IsNullOrEmpty(service)) throw new ArgumentNullException(nameof(service));
             if (string.IsNullOrEmpty(environment)) throw new ArgumentNullException(nameof(environment));
@@ -34,46 +37,48 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
             _channelSemaphore = new SemaphoreSlim(initialCount: 1, maxCount: 1);
         }
 
-        public async Task SubscribeAsync(Func<IntegrationEvent, Task<ActMode>> func, CancellationToken cancellationToken)
+        public async Task SubscribeAsync(Func<IntegrationEvent, Task<ActMode>> func, CancellationToken cancellationToken, ushort prefetchCount = 50)
         {
             string? consumerTag = null;
-            int retryForAvailability = 0;
-            const int MAX_RETRIES = 60;
-            const int ONE_MINUTE_SLEEP = 10;
+            const int MAX_RETRIES = 5;
             const int INFINITE_SLEEP = -1;
 
-            while (consumerTag == null && !cancellationToken.IsCancellationRequested)
+            try
             {
-                try
-                {
-                    consumerTag = await SubscribeAsync(func);
-                }
-                catch (Exception)
-                {
-                    if (retryForAvailability < MAX_RETRIES)
-                    {
-                        retryForAvailability++;
-                        await TaskDelayAsync(ONE_MINUTE_SLEEP, cancellationToken);
-                    }
-                    else
-                        throw;
-                }
+                var policy = Policy.Handle<SocketException>()
+                            .Or<RabbitMQConsumerIdIsNullException>()
+                            .WaitAndRetryAsync(MAX_RETRIES, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+                            {
+                                _logger.LogWarning(ex, "RabbitMQ consumer could not subscribe after {TimeOut}s for event {EventName}", $"{time.TotalSeconds:n1}", typeof(T).Name);
+                            }
+                    );
 
-                if (consumerTag != null)
+                await policy.ExecuteAsync(async () =>
                 {
+                    consumerTag = await SubscribeAsync(prefetchCount, func); ;
+
+                    if (consumerTag == null)
+                        throw new RabbitMQConsumerIdIsNullException();
+
                     //https://learn.microsoft.com/en-us/dotnet/api/system.threading.tasks.task.delay?view=net-7.0  -1 will delay infinite
                     await TaskDelayAsync(INFINITE_SLEEP, cancellationToken);
                     await UnsubscribeAsync(consumerTag: consumerTag);
-                }
+                });
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Something unexpected happened when tying to subscribe to event {EventName}", typeof(T).Name);
+                throw;
             }
         }
 
-        public async Task<string> SubscribeAsync(Func<IntegrationEvent, Task<ActMode>> func)
+        public async Task<string> SubscribeAsync(ushort prefetchCount, Func<IntegrationEvent, Task<ActMode>> func)
         {
             if (func == null) throw new ArgumentNullException(nameof(func));
             await DeclareQueueAsync();
 
-            Channel = await GetChannelAsync();
+            Channel = await GetChannelAsync(prefetchCount);
 
             try
             {
@@ -97,12 +102,13 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
 
         public async Task UnsubscribeAsync(string consumerTag)
         {
+            _logger.LogInformation("Unsubscribe to consumer tag {ConsumerTag}", consumerTag);
             Channel?.Close(200, $"Unsubscribe {consumerTag}");
             Channel?.Dispose();
             await Task.CompletedTask;
         }
 
-        private async Task<IModel> GetChannelAsync()
+        private async Task<IModel> GetChannelAsync(ushort prefetchCount)
         {
             if (Channel == null)
             {
@@ -114,6 +120,7 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
                     {
                         Channel = await _rabbitMQPersistentConnection.CreateModelAsync();
                         if (Channel == null) throw new InvalidOperationException($"Something went wrong creating channel for queue {_queueName}");
+                        Channel.BasicQos(prefetchSize: 0, prefetchCount: prefetchCount, global: false);
                         Channel.CallbackException += OnCallbackException;
                         Channel.ModelShutdown += OnModelShutDown;
                     }
@@ -227,7 +234,7 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
         {
             try
             {
-                await Task.Delay(TimeSpan.FromSeconds(time), cancellationToken);
+                await Task.Delay(time, cancellationToken);
             }
             catch (TaskCanceledException) { }
         }
