@@ -1,15 +1,16 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Polly;
+using System.Net.Sockets;
 
 namespace Ordering.API.Extensions
 {
     public static class WebApplicationBuilderExtensions
     {
         public static WebApplicationBuilder MigrateDatabase<TContext>(this WebApplicationBuilder webApplicationBuilder,
-                                            Action<TContext, IServiceProvider> seeder,
-                                            int? retry = 0) where TContext : DbContext
+                                            Action<TContext, IServiceProvider> seeder) where TContext : DbContext
         {
-            int retryForAvailability = retry.Value;
+            int _retryCount = 5;
             using var provider = webApplicationBuilder.Services.BuildServiceProvider();
             using (var scope = provider.CreateScope())
             {
@@ -17,25 +18,20 @@ namespace Ordering.API.Extensions
                 var logger = services.GetRequiredService<ILogger<TContext>>();
                 var context = services.GetService<TContext>();
 
-                try
+                var policy = Policy.Handle<SocketException>()
+                       .Or<SqlException>()
+                       .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+                       {
+                           logger.LogError(ex, "An error occurred while migrating the database used on context {DbContextName}", typeof(TContext).Name);
+                       }
+                   );
+
+                policy.Execute(() =>
                 {
                     logger.LogInformation("Migrating database associated with context {DbContextName}", typeof(TContext).Name);
-
                     InvokeSeeder(seeder, context, services);
-
                     logger.LogInformation("Migrated database associated with context {DbContextName}", typeof(TContext).Name);
-                }
-                catch (SqlException ex)
-                {
-                    logger.LogError(ex, "An error occurred while migrating the database used on context {DbContextName}", typeof(TContext).Name);
-
-                    if (retryForAvailability < 50)
-                    {
-                        retryForAvailability++;
-                        Thread.Sleep(2000);
-                        MigrateDatabase(webApplicationBuilder, seeder, retryForAvailability);
-                    }
-                }
+                });
             }
             return webApplicationBuilder;
         }
