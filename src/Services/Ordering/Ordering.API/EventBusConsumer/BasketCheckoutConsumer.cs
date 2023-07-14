@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Eshop.BuildingBlocks.EventBus.RabbitMQ.Abstractions;
+﻿using Eshop.BuildingBlocks.EventBus.RabbitMQ.Abstractions;
 using Eshop.BuildingBlocks.EventBus.RabbitMQ.Event;
 using Eshop.BuildingBlocks.EventBus.RabbitMQ.Types;
 using MediatR;
@@ -13,13 +12,13 @@ namespace Ordering.API.EventBusConsumer
 {
     public class BasketCheckoutConsumer : BackgroundService
     {
-        private readonly IMediator _mediator;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ILogger<BasketCheckoutConsumer> _logger;
         private readonly IRabbitMQConsumer<BasketCheckoutConsumer> _rabbitMQConsumer;
 
-        public BasketCheckoutConsumer(IMediator mediator, IMapper mapper, ILogger<BasketCheckoutConsumer> logger, IRabbitMQConsumer<BasketCheckoutConsumer> rabbitMQConsumer)
+        public BasketCheckoutConsumer(IServiceScopeFactory serviceScopeFactory, ILogger<BasketCheckoutConsumer> logger, IRabbitMQConsumer<BasketCheckoutConsumer> rabbitMQConsumer)
         {
-            _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+            _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _rabbitMQConsumer = rabbitMQConsumer ?? throw new ArgumentNullException(nameof(rabbitMQConsumer));
         }
@@ -35,6 +34,9 @@ namespace Ordering.API.EventBusConsumer
 
         public async Task<ActMode> HandleEvent(IntegrationEvent eventMessage)
         {
+            using var scope = _serviceScopeFactory.CreateScope();
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
             CheckoutOrderCommand? command;
 
             try
@@ -54,7 +56,7 @@ namespace Ordering.API.EventBusConsumer
 
             try
             {
-                var result = await _mediator.Send(command);
+                var result = await mediator.Send(command);
                 _logger.LogInformation("Order checkout was processed successfully for user {Username} with orderId {OrderId}", command.Username, result);
                 return ActMode.Ack;
             }
