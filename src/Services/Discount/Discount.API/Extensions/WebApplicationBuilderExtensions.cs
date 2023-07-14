@@ -1,4 +1,6 @@
 ﻿using Npgsql;
+using Polly;
+using System.Net.Sockets;
 
 namespace Discount.API.Extensions
 {
@@ -7,6 +9,7 @@ namespace Discount.API.Extensions
         public static WebApplicationBuilder MigrateDatabase<TContext>(this WebApplicationBuilder webApplicationBuilder, int? retry = 0)
         {
             int retryForAvailability = retry.Value;
+            int retryCount = 5;
             using var provider = webApplicationBuilder.Services.BuildServiceProvider();
             using (var scope = provider.CreateScope())
             {
@@ -14,7 +17,15 @@ namespace Discount.API.Extensions
                 var configuration = services.GetRequiredService<IConfiguration>();
                 var logger = services.GetRequiredService<ILogger<TContext>>();
 
-                try
+                var policy = Policy.Handle<SocketException>()
+                       .Or<NpgsqlException>()
+                       .WaitAndRetry(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+                       {
+                           logger.LogError(ex, "An error occurred while migrating the postresql database");
+                       }
+                   );
+
+                policy.Execute(() =>
                 {
                     logger.LogInformation("Migrating postresql database.");
 
@@ -43,18 +54,8 @@ namespace Discount.API.Extensions
                     command.ExecuteNonQuery();
 
                     logger.LogInformation("Migrated postresql database.");
-                }
-                catch (NpgsqlException ex)
-                {
-                    logger.LogError(ex, "An error occurred while migrating the postresql database");
 
-                    if (retryForAvailability < 50)
-                    {
-                        retryForAvailability++;
-                        Thread.Sleep(2000);
-                        MigrateDatabase<TContext>(webApplicationBuilder, retryForAvailability);
-                    }
-                }
+                });
             }
 
             return webApplicationBuilder;

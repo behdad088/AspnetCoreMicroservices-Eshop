@@ -10,7 +10,7 @@ namespace Ordering.API.Extensions
         public static WebApplicationBuilder MigrateDatabase<TContext>(this WebApplicationBuilder webApplicationBuilder,
                                             Action<TContext, IServiceProvider> seeder) where TContext : DbContext
         {
-            int _retryCount = 5;
+            int retryCount = 5;
             using var provider = webApplicationBuilder.Services.BuildServiceProvider();
             using (var scope = provider.CreateScope())
             {
@@ -20,7 +20,7 @@ namespace Ordering.API.Extensions
 
                 var policy = Policy.Handle<SocketException>()
                        .Or<SqlException>()
-                       .WaitAndRetry(_retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+                       .WaitAndRetry(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
                        {
                            logger.LogError(ex, "An error occurred while migrating the database used on context {DbContextName}", typeof(TContext).Name);
                        }
