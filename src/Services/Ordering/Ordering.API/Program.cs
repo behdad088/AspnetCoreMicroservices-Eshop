@@ -14,7 +14,7 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // Add Migration
-builder.MigrateDatabase<OrderContext>((context, services) =>
+builder.Services.MigrateDatabase<OrderContext>((context, services) =>
 {
     var logger = services.GetService<ILogger<OrderContextSeed>>();
     OrderContextSeed

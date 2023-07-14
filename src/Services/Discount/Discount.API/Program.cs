@@ -3,7 +3,7 @@ using Discount.API.Grpc;
 using Discount.API.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.MigrateDatabase<Program>();
+builder.Services.MigrateDatabase<Program>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // Add services to the container.
