@@ -45,4 +45,4 @@ app.UseAuthorization();
 app.MapGrpcService<OrderService>();
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
