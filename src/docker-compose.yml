@@ -43,9 +43,16 @@ services:
       context: .
       dockerfile: Services/Ordering/Ordering.API/Dockerfile
 
+  web.shopping.httpaggregator:
+    image: ${DOCKER_REGISTRY-}webshoppinghttpaggregator
+    build:
+      context: .
+      dockerfile: ApiGateways/Web.Bff.Shopping/aggregator/Dockerfile
+
 volumes:
   mongo_data:
   postgres_data:
   pgadmin_data:
   rabbitmq_data:
+
 

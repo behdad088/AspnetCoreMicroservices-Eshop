@@ -114,3 +114,19 @@ services:
       - "8003:80"
       - "9003:81" 
 
+
+  web.shopping.httpaggregator:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ReverseProxy__Clusters__basket__Destinations__destination0__Address=http://basket.api
+      - ReverseProxy__Clusters__catalog__Destinations__destination0__Address=http://catalog.api
+      - ReverseProxy__Clusters__orders__Destinations__destination0__Address=http://ordering.api
+      - ReverseProxy__Clusters__discount__Destinations__destination0__Address=http://discount.api
+    depends_on:
+      - basket.api
+      - catalog.api
+      - ordering.api
+      - discount.api
+    ports:
+      - "8080:80"
+
