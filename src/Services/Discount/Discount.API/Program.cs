@@ -34,4 +34,4 @@ app.UseAuthorization();
 app.MapGrpcService<DiscountService>();
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

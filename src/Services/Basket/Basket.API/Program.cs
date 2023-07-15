@@ -44,4 +44,4 @@ app.UseAuthorization();
 app.MapGrpcService<BasketService>();
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

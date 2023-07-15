@@ -33,4 +33,4 @@ app.UseAuthorization();
 app.MapGrpcService<CatalogService>();
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
