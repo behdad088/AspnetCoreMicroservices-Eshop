@@ -7,7 +7,8 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["Services/Discount/Discount.API/Discount.API.csproj", "Services/Discount/Discount.API/"]
-COPY ["BuildingBlocks/EventBus/EventBus/EventBus.csproj", "BuildingBlocks/EventBus/"]
+COPY ["Services/Services.Common/Services.Common.csproj", "Services/Services.Common/"]
+COPY ["BuildingBlocks/EventBus/RabbitMQ/RabbitMQ.csproj", "BuildingBlocks/EventBus/RabbitMQ/"]
 RUN dotnet restore "Services/Discount/Discount.API/Discount.API.csproj"
 COPY . .
 WORKDIR "/src/Services/Discount/Discount.API"

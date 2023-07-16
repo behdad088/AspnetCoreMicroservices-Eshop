@@ -1,4 +1,6 @@
+using Services.Common;
 using Web.Shopping.HttpAggregator.Extensions;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,8 +10,10 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks(builder.Configuration);
 
 var app = builder.Build();
+app.MapDefaultHealthChecks();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
