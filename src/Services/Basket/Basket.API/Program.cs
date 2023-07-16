@@ -1,3 +1,4 @@
+using Basket.API.Extensions;
 using Basket.API.Grpc;
 using Basket.API.Models.Configs;
 using Basket.API.Repositories;
@@ -15,11 +16,8 @@ builder.Services.AddGrpc();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    options.Configuration = builder.Configuration.GetValue<string>("CacheSettings:ConnectionString");
-});
-
+builder.Services.AddRedis(builder.Configuration);
+builder.Services.AddHealthChecks(builder.Configuration);
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 builder.Services.Configure<UrlsConfig>(builder.Configuration.GetSection("urls"));
 builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>((service, option) =>
@@ -32,6 +30,7 @@ builder.Services.AddRMQConnection(builder.Configuration.GetValue<string>("EventB
 builder.Services.AddRMQProducer("uat", "order", "checkout");
 
 var app = builder.Build();
+app.MapDefaultHealthChecks();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

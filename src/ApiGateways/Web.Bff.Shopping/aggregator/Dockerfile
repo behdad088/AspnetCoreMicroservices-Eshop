@@ -7,6 +7,8 @@ EXPOSE 80
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["ApiGateways/Web.Bff.Shopping/aggregator/Web.Shopping.HttpAggregator.csproj", "ApiGateways/Web.Bff.Shopping/aggregator/"]
+COPY ["Services/Services.Common/Services.Common.csproj", "Services/Services.Common/"]
+COPY ["BuildingBlocks/EventBus/RabbitMQ/RabbitMQ.csproj", "BuildingBlocks/EventBus/RabbitMQ/"]
 RUN dotnet restore "ApiGateways/Web.Bff.Shopping/aggregator/Web.Shopping.HttpAggregator.csproj"
 COPY . .
 WORKDIR "/src/ApiGateways/Web.Bff.Shopping/aggregator"

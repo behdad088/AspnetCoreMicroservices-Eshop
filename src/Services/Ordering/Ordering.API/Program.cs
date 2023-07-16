@@ -28,12 +28,13 @@ builder.Services.AddGrpc();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks(builder.Configuration);
 builder.Services.AddRMQConnection(builder.Configuration.GetValue<string>("EventBusSettings:HostAddress"));
 builder.Services.AddRMQConsumer<BasketCheckoutConsumer>("uat", "order", "checkout");
 builder.Services.AddHostedService<BasketCheckoutConsumer>();
 
 var app = builder.Build();
-
+app.MapDefaultHealthChecks();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
