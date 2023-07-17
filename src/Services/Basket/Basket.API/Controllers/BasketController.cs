@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Basket.API.Entities;
+﻿using Basket.API.Entities;
 using Basket.API.Repositories;
 using Discount.Grpc.Protos;
 using Eshop.BuildingBlocks.EventBus.RabbitMQ.Abstractions;
@@ -13,19 +12,16 @@ namespace Basket.API.Controllers
     public class BasketController : ControllerBase
     {
         private readonly IBasketRepository _repository;
-        private readonly IMapper _mapper;
         private readonly IRabbitMQProducer _rabbitMQProducer;
         private readonly DiscountProtoService.DiscountProtoServiceClient _discountProtoServiceClient;
 
         public BasketController(
             IBasketRepository repository,
             DiscountProtoService.DiscountProtoServiceClient discountProtoServiceClient,
-            IMapper mapper,
             IRabbitMQProducer rabbitMQProducer)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _discountProtoServiceClient = discountProtoServiceClient ?? throw new ArgumentNullException(nameof(discountProtoServiceClient));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _rabbitMQProducer = rabbitMQProducer ?? throw new ArgumentNullException(nameof(rabbitMQProducer));
         }
 
@@ -33,6 +29,9 @@ namespace Basket.API.Controllers
         [ProducesResponseType(typeof(ShoppingCart), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<ShoppingCart>> GetBasket(string username)
         {
+            if (string.IsNullOrEmpty(username))
+                return BadRequest("Username cannot be null or empty.");
+
             var basket = await _repository.GetBasketAsync(username);
             return Ok(basket ?? new ShoppingCart(username));
         }
@@ -41,9 +40,6 @@ namespace Basket.API.Controllers
         [ProducesResponseType(typeof(ShoppingCart), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<ShoppingCart>> UpdateBasket([FromBody] ShoppingCart basket)
         {
-            // TODO : Communicate with Discount.Grpc
-            // and Calculate latest prices of product into shopping cart
-            // consume Discount Grpc
             foreach (var item in basket.Items)
             {
                 var discountResquest = new GetDiscountRequest() { ProductName = item.ProductName };
