@@ -1,24 +1,29 @@
 ﻿using AutoMapper;
+using Basket.API.Entities;
 using Basket.API.Repositories;
 using Basket.Grpc.Protos;
 using Discount.Grpc.Protos;
+using Eshop.BuildingBlocks.EventBus.RabbitMQ.Abstractions;
 using Grpc.Core;
 
 namespace Basket.API.Grpc
 {
     public class BasketService : BasketProtoService.BasketProtoServiceBase
     {
+        private readonly IRabbitMQProducer _rabbitMQProducer;
         private readonly IBasketRepository _repository;
         private readonly IMapper _mapper;
         private readonly ILogger<BasketService> _logger;
         private readonly DiscountProtoService.DiscountProtoServiceClient _discountProtoServiceClient;
 
         public BasketService(
+            IRabbitMQProducer rabbitMQProducer,
             IBasketRepository repository,
             IMapper mapper,
             ILogger<BasketService> logger,
             DiscountProtoService.DiscountProtoServiceClient discountProtoServiceClient)
         {
+            _rabbitMQProducer = rabbitMQProducer ?? throw new ArgumentNullException(nameof(rabbitMQProducer));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -27,8 +32,11 @@ namespace Basket.API.Grpc
 
         public override async Task<ShoppingCartModel> GetBasket(GetBasketRequest request, ServerCallContext context)
         {
+            if (string.IsNullOrEmpty(request.Username))
+                throw new RpcException(new Status(StatusCode.InvalidArgument, "Username cannot be null or empty."));
+
             var basket = await _repository.GetBasketAsync(request.Username);
-            basket ??= new Entities.ShoppingCart(request.Username);
+            basket ??= new ShoppingCart(request.Username);
             _logger.LogInformation("Basket is retrieved for Username : {Username}", request.Username);
 
             var shoppingCartModel = _mapper.Map<ShoppingCartModel>(basket);
@@ -52,10 +60,25 @@ namespace Basket.API.Grpc
             return shoppingCartModel;
         }
 
-        public override async Task<DeletetBasketResponse> DeletetBasket(DeletetBasketRequest request, ServerCallContext context)
+        public override async Task<NoResponse> DeletetBasket(DeletetBasketRequest request, ServerCallContext context)
         {
             await _repository.DeleteBasketAsync(request.Username);
-            return new DeletetBasketResponse();
+            return new NoResponse();
+        }
+
+        public override async Task<NoResponse> Checkout(CheckoutViewModel request, ServerCallContext context)
+        {
+            var basket = await _repository.GetBasketAsync(request.Username);
+            if (basket == null)
+                throw new RpcException(new Status(StatusCode.NotFound, "Basket not found."));
+
+            request.TotalPrice = (double)basket.TotalPrice;
+            var basketCheckout = _mapper.Map<BasketCheckout>(request);
+
+            await _rabbitMQProducer.PublishAsJsonAsync("order.checkout", basketCheckout);
+            await _repository.DeleteBasketAsync(basket.Username);
+
+            return new NoResponse();
         }
     }
 }

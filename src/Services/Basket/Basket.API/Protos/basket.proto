@@ -5,7 +5,8 @@ option csharp_namespace = "Basket.Grpc.Protos";
 service BasketProtoService {
     rpc GetBasket (GetBasketRequest) returns (ShoppingCartModel);
     rpc UpdateBasket (UpdateBasketRequest) returns (ShoppingCartModel);
-    rpc DeletetBasket (DeletetBasketRequest) returns (DeletetBasketResponse);
+    rpc DeletetBasket (DeletetBasketRequest) returns (NoResponse);
+    rpc Checkout (CheckoutViewModel) returns (NoResponse);
 }
 
 message ShoppingCartModel {
@@ -34,6 +35,27 @@ message DeletetBasketRequest {
     string username = 1;
 }
 
-message DeletetBasketResponse {
+message NoResponse {
 
+}
+
+message CheckoutViewModel {
+    string username = 1;
+    double totalPrice = 2;
+
+      // BillingAddress
+    string firstName = 3;
+    string lastName = 4;
+    string emailAddress = 5;
+    string addressLine = 6;
+    string country = 7;
+    string state = 8;
+    string zipCode = 9;
+
+     // Payment
+    string cardName = 10;
+    string cardNumber = 11;
+    string expiration = 12;
+    string cvv = 13;
+    int32 paymentMethod = 14;
 }
