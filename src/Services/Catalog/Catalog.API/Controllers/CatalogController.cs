@@ -34,7 +34,7 @@ namespace Catalog.API.Controllers
             var product = await _repository.GetProductAsync(id);
             if (product == null)
             {
-                _logger.LogError($"Product with id: {id}, not found.");
+                _logger.LogError($"Product with id: {GetLogStringValue(id)}, not found.");
                 return NotFound();
             }
             return Ok(product);
@@ -69,6 +69,17 @@ namespace Catalog.API.Controllers
         public async Task<IActionResult> DeleteProductById(string id)
         {
             return Ok(await _repository.DeleteProductAsync(id));
+        }
+
+        /// <summary>
+        /// Prevents Log Injection attacks
+        /// https://owasp.org/www-community/attacks/Log_Injection
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private string GetLogStringValue(string value)
+        {
+            return value.Replace(Environment.NewLine, "");
         }
     }
 }
