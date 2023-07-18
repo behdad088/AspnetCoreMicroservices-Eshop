@@ -22,8 +22,8 @@ on:
 env:
   SERVICE: basket.api
   IMAGE: basket.api
-  ProjectPath: Services/Basket/Basket.API
-  ProjectTestPath: Services/Basket/Basket.API.Tests
+  ProjectPath: src/Services/Basket/Basket.API
+  ProjectTestPath: src/Services/Basket/Basket.API.Tests
   RegistryUsername: behdadkardgar
     
 jobs:

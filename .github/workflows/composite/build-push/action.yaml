@@ -35,13 +35,13 @@ runs:
       run: |
         cd src 
         dotnet restore "eshop-microservices.sln"
+        cd -
         cd  ${{ inputs.project_path }}
         dotnet build --no-restore
     - name: Run Tests
       shell: bash
       if: ${{ inputs.test_path != '' }}
       run: |
-        ls -R
         cd ${{ inputs.test_path }}
         dotnet test --no-build -v=normal
 
