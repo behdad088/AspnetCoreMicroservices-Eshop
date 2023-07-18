@@ -43,7 +43,7 @@ runs:
       if: ${{ inputs.test_path != '' }}
       run: |
         cd ${{ inputs.test_path }}
-        dotnet test --no-build -v=normal
+        dotnet test -v=normal
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
