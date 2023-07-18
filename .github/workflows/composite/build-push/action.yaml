@@ -42,6 +42,7 @@ runs:
       if: ${{ inputs.test_path != '' }}
       run: |
         cd -
+        ls -R
         cd ${{ inputs.test_path }}
         dotnet test --no-build -v=normal
 
