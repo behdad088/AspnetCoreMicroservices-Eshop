@@ -41,6 +41,7 @@ runs:
       shell: bash
       if: ${{ inputs.test_path != '' }}
       run: |
+        cd -
         cd ${{ inputs.test_path }}
         dotnet test --no-build -v=normal
 
