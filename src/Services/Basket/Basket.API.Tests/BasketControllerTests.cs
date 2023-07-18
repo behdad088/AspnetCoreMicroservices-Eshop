@@ -147,5 +147,11 @@ namespace Basket.API.Tests
             _rabbitMQProducerMock.Verify(x => x.PublishAsJsonAsync(It.IsAny<string>(), It.IsAny<object>()), Times.Once);
             _basketRepositoryMock.Verify(x => x.DeleteBasketAsync(It.IsAny<string>()), Times.Once);
         }
+
+        [Fact]
+        public void FallingTest()
+        {
+            Assert.True(false);
+        }
     }
 }
