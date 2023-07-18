@@ -26,20 +26,24 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v3
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
       shell: bash
-      working-directory: ${{ inputs.project_path }}
-      run: dotnet restore
+      run: |
+        cd src 
+        dotnet restore "eshop-microservices.sln"
+        cd -
+        cd  ${{ inputs.project_path }}
+        dotnet build --no-restore
     - name: Run Tests
       shell: bash
       if: ${{ inputs.test_path != '' }}
-      working-directory: ${{ inputs.test_path }}
-      run: dotnet test --no-build --verbosity normal
+      run: |
+        cd ${{ inputs.test_path }}
+        dotnet test -v=normal
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
