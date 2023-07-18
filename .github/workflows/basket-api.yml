@@ -36,7 +36,7 @@ jobs:
       uses: actions/checkout@v2
     - name: Test
       run: |
-          ls
+          ls -R
           dotnet test --no-restore --verbosity normal
       working-directory: src/Services/Basket/Basket.API.Tests
     - uses: ./.github/workflows/composite/build-push
