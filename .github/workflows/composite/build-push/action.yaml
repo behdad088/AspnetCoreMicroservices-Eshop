@@ -39,7 +39,7 @@ runs:
       shell: bash
       if: ${{ inputs.test_path != '' }}
       working-directory: ${{ inputs.test_path }}
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-restore --verbosity normal
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
