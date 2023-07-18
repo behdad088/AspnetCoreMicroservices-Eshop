@@ -34,13 +34,14 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
     - uses: ./.github/workflows/composite/build-push
       with: 
         service: ${{ env.SERVICE }}
         image_name: ${{ env.IMAGE }}
         registry_username: ${{ env.RegistryUsername }}
         project_path: ${{ env.ProjectPath }}
-        test_path: ${{ env.ProjectTestPath }}
         dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
         dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
 
