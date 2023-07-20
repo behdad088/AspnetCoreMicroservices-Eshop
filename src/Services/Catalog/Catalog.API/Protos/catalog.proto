@@ -2,7 +2,7 @@
 option csharp_namespace = "Catalog.Grpc.Protos";
 
 service CatalogProtoService {
-	rpc GetProducts(GetProductsRequest) returns (GetProductsResponse);
+	rpc GetProducts(NoRequest) returns (GetProductsResponse);
 	rpc GetProductById(GetProductByIdRequest) returns (ProductModel);
 	rpc GetProductByCategory(GetProductByCategoryRequest) returns (GetProductByCategoryResponse);
 	rpc CreateProduct(CreateProductRequest) returns (ProductModel);
@@ -20,7 +20,7 @@ message ProductModel {
 	int64 price = 7;
 }
 
-message GetProductsRequest {
+message NoRequest {
 
 }
 
