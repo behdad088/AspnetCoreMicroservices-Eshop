@@ -126,6 +126,9 @@ services:
       - BasketUrlHC=http://basket.api/hc
       - DiscountUrlHC=http://discount.api/hc
       - OrderingUrlHC=http://ordering.api/hc
+      - Urls__GrpcBasket=http://basket.api:81
+      - Urls__GrpcCatalog=http://catalog.api:81
+      - Urls__GrpcOrdering=http://ordering.api:81
     depends_on:
       - basket.api
       - catalog.api

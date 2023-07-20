@@ -19,7 +19,7 @@ namespace Catalog.API.Grpc
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public override async Task<GetProductsResponse> GetProducts(GetProductsRequest request, ServerCallContext context)
+        public override async Task<GetProductsResponse> GetProducts(NoRequest request, ServerCallContext context)
         {
             var products = await _repository.GetProductsAsync();
             var productModels = _mapper.Map<List<ProductModel>>(products);

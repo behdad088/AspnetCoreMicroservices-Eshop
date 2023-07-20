@@ -1,9 +1,9 @@
 using Services.Common;
 using Web.Shopping.HttpAggregator.Extensions;
-
+using Web.Shopping.HttpAggregator.Models.Config;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // Add services to the container.
 builder.Services.AddReverseProxy(builder.Configuration);
 builder.Services.AddControllers();
@@ -11,6 +11,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks(builder.Configuration);
+builder.Services.AddGrpcServices();
+builder.Services.Configure<UrlsConfig>(builder.Configuration.GetSection("urls"));
 
 var app = builder.Build();
 app.MapDefaultHealthChecks();
