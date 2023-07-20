@@ -133,7 +133,6 @@ services:
       - basket.api
       - catalog.api
       - ordering.api
-      - discount.api
     ports:
       - "8080:80"
 
