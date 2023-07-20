@@ -10,19 +10,19 @@ on:
     paths:
     - src/BuildingBlocks/**
     - src/Services/ApiGateways/Web.Bff.Shopping/**
-    - .github/workflows/basket-api.yml
+    - .github/workflows/web-shopping.yml
 
   pull_request:
     branches: [ "main" ]
     paths:
     - src/BuildingBlocks/**
     - src/Services/ApiGateways/Web.Bff.Shopping/**
-    - .github/workflows/basket-api.yml
+    - .github/workflows/web-shopping.yml
 
 env:
   SERVICE: web.shopping.httpaggregator
   IMAGE: web.shopping.httpaggregator
-  ProjectPath: src/ApiGateways/Web.Bff.Shopping/aggregator/Web.Shopping.HttpAggregator
+  ProjectPath: src/ApiGateways/Web.Bff.Shopping/aggregator
   RegistryUsername: behdadkardgar
     
 jobs:
