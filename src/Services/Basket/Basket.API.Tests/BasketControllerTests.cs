@@ -33,10 +33,10 @@ namespace Basket.API.Tests
         {
             // Arrange
             var username = string.Empty;
-            var controler = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
+            var controller = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
 
             // Act
-            var actual = await controler.GetBasket(username);
+            var actual = await controller.GetBasket(username);
 
             // Assert 
             Assert.IsType<BadRequestObjectResult>(actual.Result);
@@ -48,10 +48,10 @@ namespace Basket.API.Tests
             // Arrange
             var username = "test";
             _basketRepositoryMock.Setup(x => x.GetBasketAsync(It.IsAny<string>())).ReturnsAsync(() => null);
-            var controler = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
+            var controller = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
 
             // Act
-            var actual = await controler.GetBasket(username);
+            var actual = await controller.GetBasket(username);
 
             // Assert
             Assert.NotNull(actual);
@@ -81,10 +81,10 @@ namespace Basket.API.Tests
                 .Returns(discountMockCall);
 
             _basketRepositoryMock.Setup(x => x.UpdateBasketAsync(It.IsAny<ShoppingCart>())).ReturnsAsync(basket);
-            var controler = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
+            var controller = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
 
             // Act
-            var actual = await controler.UpdateBasket(basket);
+            var actual = await controller.UpdateBasket(basket);
 
             // Assert
             Assert.NotNull(actual);
@@ -103,10 +103,10 @@ namespace Basket.API.Tests
                 Username = "test",
             };
             _basketRepositoryMock.Setup(x => x.GetBasketAsync(It.IsAny<string>())).ReturnsAsync(() => null);
-            var controler = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
+            var controller = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
 
             // Act 
-            var actual = await controler.Checkout(basket);
+            var actual = await controller.Checkout(basket);
 
             // Assert 
             Assert.IsType<BadRequestResult>(actual);
@@ -135,12 +135,12 @@ namespace Basket.API.Tests
                 }
             });
 
-            var controler = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
+            var controller = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
             _rabbitMQProducerMock.Setup(x => x.PublishAsJsonAsync(It.IsAny<string>(), It.IsAny<object>()));
             _basketRepositoryMock.Setup(x => x.DeleteBasketAsync(It.IsAny<string>()));
 
             // Act 
-            var actual = await controler.Checkout(basket);
+            var actual = await controller.Checkout(basket);
 
             // Assert 
             Assert.IsType<AcceptedResult>(actual);
