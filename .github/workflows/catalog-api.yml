@@ -23,6 +23,7 @@ env:
   SERVICE: catalog.api
   IMAGE: catalog.api
   ProjectPath: src/Services/Catalog/Catalog.API
+  ProjectTestPath: src/Services/Catalog/Catalog.API.Tests
   RegistryUsername: behdadkardgar
     
 jobs:
@@ -39,6 +40,7 @@ jobs:
         image_name: ${{ env.IMAGE }}
         registry_username: ${{ env.RegistryUsername }}
         project_path: ${{ env.ProjectPath }}
+        test_path: ${{ env.ProjectTestPath }}
         dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
         dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
 
