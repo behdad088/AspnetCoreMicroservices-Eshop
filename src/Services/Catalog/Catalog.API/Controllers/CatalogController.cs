@@ -31,6 +31,9 @@ namespace Catalog.API.Controllers
         [ProducesResponseType(typeof(Product), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<Product>> GetProductById(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return BadRequest("Product Id cannot be null or empty.");
+
             var product = await _repository.GetProductAsync(id);
             if (product == null)
             {
@@ -45,6 +48,9 @@ namespace Catalog.API.Controllers
         [ProducesResponseType(typeof(IEnumerable<Product>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IEnumerable<Product>>> GetProductByCategory(string category)
         {
+            if (string.IsNullOrEmpty(category))
+                return BadRequest("Category cannot be null or empty.");
+
             var products = await _repository.GetProductByCategoryAsync(category);
             return Ok(products);
         }
@@ -68,6 +74,9 @@ namespace Catalog.API.Controllers
         [ProducesResponseType(typeof(Product), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> DeleteProductById(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return BadRequest("Product Id cannot be null or empty.");
+
             return Ok(await _repository.DeleteProductAsync(id));
         }
 
