@@ -86,7 +86,7 @@ namespace Catalog.API.Controllers
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        private string GetLogStringValue(string value)
+        private static string GetLogStringValue(string value)
         {
             return value.Replace(Environment.NewLine, "");
         }

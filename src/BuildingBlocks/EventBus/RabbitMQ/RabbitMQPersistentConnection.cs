@@ -13,7 +13,7 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
         private readonly IConnectionFactory _connectionFactory;
         private readonly ILogger<RabbitMQPersistentConnection> _logger;
         private readonly int _retryCount;
-        private IConnection _connection;
+        private IConnection? _connection;
         public bool Disposed;
         private readonly SemaphoreSlim _sessionSemaphore;
 
@@ -54,25 +54,35 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
             if (!IsConnected())
                 throw new InvalidOperationException("No RabbitMQ connections are available to perform this action");
 
-            return _connection.CreateModel();
+            return _connection?.CreateModel() ?? throw new Exception("Something went wrong when creating rmq channel.");
         }
 
         public void Dispose()
         {
-            if (Disposed || _connection == null) return;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
-            Disposed = true;
-            try
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                _connection.ConnectionShutdown -= OnConnectionShutdownAsync;
-                _connection.CallbackException -= OnCallbackExceptionAsync;
-                _connection.ConnectionBlocked -= OnConnectionBlockedAsync;
-                _connection?.Close(200, $"Dispose of {nameof(RabbitMQPersistentConnection)}");
-                _connection?.Dispose();
-            }
-            catch (IOException ex)
-            {
-                _logger.LogCritical(ex.ToString());
+
+                if (Disposed || _connection == null) return;
+
+                Disposed = true;
+                try
+                {
+                    _connection.ConnectionShutdown -= OnConnectionShutdownAsync;
+                    _connection.CallbackException -= OnCallbackExceptionAsync;
+                    _connection.ConnectionBlocked -= OnConnectionBlockedAsync;
+                    _connection?.Close(200, $"Dispose of {nameof(RabbitMQPersistentConnection)}");
+                    _connection?.Dispose();
+                }
+                catch (IOException ex)
+                {
+                    _logger.LogCritical(ex, "Something went wrong disposing rmq connection.");
+                }
             }
         }
 
@@ -99,6 +109,8 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
 
                 if (IsConnected())
                 {
+                    if (_connection == null) throw new Exception("Something went wrong creating rmq connection.");
+
                     _connection.ConnectionShutdown += OnConnectionShutdownAsync;
                     _connection.CallbackException += OnCallbackExceptionAsync;
                     _connection.ConnectionBlocked += OnConnectionBlockedAsync;
