@@ -16,7 +16,7 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
         private readonly IRabbitMQPersistentConnection _rabbitMQPersistentConnection;
         private readonly ILogger<RabbitMQConsumer<T>> _logger;
         private readonly string _queueName;
-        private IModel Channel;
+        private IModel? Channel;
         private bool IsQueueDeclared = false;
         private readonly SemaphoreSlim _channelSemaphore;
 
@@ -120,6 +120,7 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
                     {
                         Channel = await _rabbitMQPersistentConnection.CreateModelAsync();
                         if (Channel == null) throw new InvalidOperationException($"Something went wrong creating channel for queue {_queueName}");
+
                         Channel.BasicQos(prefetchSize: 0, prefetchCount: prefetchCount, global: false);
                         Channel.CallbackException += OnCallbackException;
                         Channel.ModelShutdown += OnModelShutDown;
@@ -182,7 +183,7 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
             await Task.CompletedTask;
         }
 
-        private IntegrationEvent GetIntegrationEventObject(BasicDeliverEventArgs e)
+        private static IntegrationEvent GetIntegrationEventObject(BasicDeliverEventArgs e)
         {
             var message = new IntegrationEvent(
                         body: e.Body.ToArray(),
@@ -196,6 +197,8 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
 
         private void AcknowledgeMessage(ActMode actMode, ulong deliveryTag)
         {
+            if (Channel == null) throw new Exception($"channel cannot be wrong for queue {_queueName}");
+
             switch (actMode)
             {
                 case ActMode.Ack:
@@ -223,14 +226,14 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
             }
             catch (Exception ex)
             {
-                _logger?.LogError(ex, "Unhandled exception in handler for queue {QueneName}", _queueName);
+                _logger?.LogError(ex, "Unhandled exception in handler for queue {QueueName}", _queueName);
                 actMode = ActMode.NackWithoutRequeue;
             }
 
             AcknowledgeMessage(actMode, e.DeliveryTag);
         }
 
-        private async Task TaskDelayAsync(int time, CancellationToken cancellationToken)
+        private static async Task TaskDelayAsync(int time, CancellationToken cancellationToken)
         {
             try
             {
@@ -241,11 +244,21 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
 
         public void Dispose()
         {
-            if (Channel != null)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                Channel?.Close(200, $"Disposing {nameof(RabbitMQPersistentConnection)}");
-                Channel?.Dispose();
+                if (Channel != null)
+                {
+                    Channel?.Close(200, $"Disposing {nameof(RabbitMQPersistentConnection)}");
+                    Channel?.Dispose();
+                }
             }
         }
+
     }
 }
