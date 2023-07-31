@@ -254,8 +254,8 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
             {
                 if (Channel != null)
                 {
-                    Channel?.Close(200, $"Disposing {nameof(RabbitMQPersistentConnection)}");
-                    Channel?.Dispose();
+                    Channel.Close(200, $"Disposing {nameof(RabbitMQPersistentConnection)}");
+                    Channel.Dispose();
                 }
             }
         }
