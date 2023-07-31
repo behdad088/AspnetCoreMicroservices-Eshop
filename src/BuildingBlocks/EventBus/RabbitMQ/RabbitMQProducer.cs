@@ -14,7 +14,7 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
         private readonly string _exchangeType;
         private readonly IRabbitMQPersistentConnection _rabbitMQPersistentConnection;
         private readonly SemaphoreSlim _channelSemaphore;
-        private IModel Channel;
+        private IModel? Channel;
         private readonly ILogger<RabbitMQProducer> _logger;
         private readonly IClock _clock;
         private bool IsExchangeDeclared = false;
@@ -50,7 +50,6 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
             var body = Encoding.UTF8.GetBytes(message);
             await PublishAsync(body, routingKey, _clock.GetCurrentInstant());
         }
-
 
         private async Task PublishAsync(byte[]? body, string routingKey, Instant instant, bool persistent = true, string? contentType = null)
         {
@@ -116,7 +115,7 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
             }
         }
 
-        private void AssertRMQExchangeName(string service,
+        private static void AssertRMQExchangeName(string service,
             string environment,
             string name,
             string exchangeType)
@@ -128,7 +127,7 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
             AssertRMQExchangeType(exchangeType);
         }
 
-        private void AssertRMQExchangeType(string exchangeType)
+        private static void AssertRMQExchangeType(string exchangeType)
         {
             if (exchangeType != "topic" && exchangeType != "direct" && exchangeType != "fanout " && exchangeType != "headers ")
                 throw new ArgumentException($"Invalid {nameof(exchangeType)} with value {exchangeType}");
@@ -146,10 +145,19 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
 
         public void Dispose()
         {
-            if (Channel != null)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                Channel?.Close(200, $"Disposing {nameof(RabbitMQPersistentConnection)}");
-                Channel?.Dispose();
+                if (Channel != null)
+                {
+                    Channel?.Close(200, $"Disposing {nameof(RabbitMQPersistentConnection)}");
+                    Channel?.Dispose();
+                }
             }
         }
     }
