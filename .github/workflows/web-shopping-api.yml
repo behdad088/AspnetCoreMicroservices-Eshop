@@ -10,14 +10,14 @@ on:
     paths:
     - src/BuildingBlocks/**
     - src/Services/ApiGateways/Web.Bff.Shopping/**
-    - .github/workflows/web-shopping.yml
+    - .github/workflows/web-shopping-api.yml
 
   pull_request:
     branches: [ "main" ]
     paths:
     - src/BuildingBlocks/**
     - src/Services/ApiGateways/Web.Bff.Shopping/**
-    - .github/workflows/web-shopping.yml
+    - .github/workflows/web-shopping-api.yml
 
 env:
   SERVICE: web.shopping.httpaggregator
