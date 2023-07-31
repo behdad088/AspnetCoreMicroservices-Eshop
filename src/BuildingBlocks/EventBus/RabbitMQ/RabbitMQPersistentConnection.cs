@@ -76,8 +76,8 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
                     _connection.ConnectionShutdown -= OnConnectionShutdownAsync;
                     _connection.CallbackException -= OnCallbackExceptionAsync;
                     _connection.ConnectionBlocked -= OnConnectionBlockedAsync;
-                    _connection?.Close(200, $"Dispose of {nameof(RabbitMQPersistentConnection)}");
-                    _connection?.Dispose();
+                    _connection.Close(200, $"Dispose of {nameof(RabbitMQPersistentConnection)}");
+                    _connection.Dispose();
                 }
                 catch (IOException ex)
                 {
