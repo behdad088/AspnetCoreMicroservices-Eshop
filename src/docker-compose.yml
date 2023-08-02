@@ -49,10 +49,14 @@ services:
       context: .
       dockerfile: ApiGateways/Web.Bff.Shopping/aggregator/Dockerfile
 
+  webmvc:
+    image: ${DOCKER_REGISTRY-}webmvc
+    build:
+      context: .
+      dockerfile: WebApps/WebMVC/Dockerfile
+
 volumes:
   mongo_data:
   postgres_data:
   pgadmin_data:
   rabbitmq_data:
-
-

@@ -116,6 +116,7 @@ services:
 
 
   web.shopping.httpaggregator:
+    container_name: web.shopping.httpaggregator
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ReverseProxy__Clusters__basket__Destinations__destination0__Address=http://basket.api
@@ -136,3 +137,17 @@ services:
     ports:
       - "8080:80"
 
+
+  webmvc:
+    container_name: webmvc
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:80
+      - ApiSettings__GatewayAddress=http://web.shopping.httpaggregator
+    ports:
+      - "8004:80"
+    depends_on:
+      - web.shopping.httpaggregator
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
