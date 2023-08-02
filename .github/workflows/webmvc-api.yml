@@ -1,0 +1,43 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Web MVC API CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths:
+    - src/WebApps/WebMVC/**
+    - .github/workflows/webmvc-api.yml
+
+  pull_request:
+    branches: [ "main" ]
+    paths:
+    - src/WebApps/WebMVC/**
+    - .github/workflows/webmvc-api.yml
+
+env:
+  SERVICE: webmvc
+  IMAGE: webmvc
+  ProjectPath: src/WebApps/WebMVC
+  RegistryUsername: behdadkardgar
+    
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - uses: ./.github/workflows/composite/build-push
+      with: 
+        service: ${{ env.SERVICE }}
+        image_name: ${{ env.IMAGE }}
+        registry_username: ${{ env.RegistryUsername }}
+        project_path: ${{ env.ProjectPath }}
+        dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+        dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+
+
