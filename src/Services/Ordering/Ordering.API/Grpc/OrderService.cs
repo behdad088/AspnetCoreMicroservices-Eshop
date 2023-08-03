@@ -58,7 +58,7 @@ namespace Ordering.API.Grpc
         public override async Task<Empty> DeleteOrder(OrderId request, ServerCallContext context)
         {
             _logger.LogInformation("Delete order by OrderId:{OrderId}", request.Id);
-            var command = new DeleteOrderCommand() { Id = request.Id };
+            var command = new DeleteOrderCommand(request.Id);
             await _mediator.Send(command);
             return new Empty();
         }
