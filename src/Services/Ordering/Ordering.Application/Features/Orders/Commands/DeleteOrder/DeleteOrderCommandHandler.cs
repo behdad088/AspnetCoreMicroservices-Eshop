@@ -6,6 +6,8 @@ using Ordering.Domain.Entities;
 
 namespace Ordering.Application.Features.Orders.Commands.DeleteOrder
 {
+    public record DeleteOrderCommand(int? Id) : IRequest;
+
     public class DeleteOrderCommandHandler : IRequestHandler<DeleteOrderCommand>
     {
         private readonly IOrderRepository _orderRepository;
@@ -19,7 +21,10 @@ namespace Ordering.Application.Features.Orders.Commands.DeleteOrder
 
         public async Task Handle(DeleteOrderCommand request, CancellationToken cancellationToken)
         {
-            var orderToDelete = await _orderRepository.GetByIdAsync(request.Id);
+            if (!request.Id.HasValue)
+                throw new Exception("Request Id cannot be null.");
+
+            var orderToDelete = await _orderRepository.GetByIdAsync(request.Id.Value);
             if (orderToDelete == null)
                 throw new NotFoundException(nameof(Order), request.Id);
 

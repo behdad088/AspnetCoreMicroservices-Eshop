@@ -4,6 +4,8 @@ using Ordering.Application.Contracts.Persistence;
 
 namespace Ordering.Application.Features.Orders.Queries.GetOrderLists
 {
+    public record GetOrdersListQuery(string Username) : IRequest<List<OrdersVm>>;
+
     public class GetOrdersListQueryHandler : IRequestHandler<GetOrdersListQuery, List<OrdersVm>>
     {
         private readonly IOrderRepository _orderRepository;

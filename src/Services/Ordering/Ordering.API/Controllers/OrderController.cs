@@ -52,7 +52,7 @@ namespace Ordering.API.Controllers
         [ProducesDefaultResponseType]
         public async Task<ActionResult> DeleteOrder(int id)
         {
-            var command = new DeleteOrderCommand() { Id = id };
+            var command = new DeleteOrderCommand(id);
             await _mediator.Send(command);
             return NoContent();
         }
