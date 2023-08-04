@@ -1,7 +1,10 @@
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using System;
 using WebMVC.Services;
@@ -20,6 +23,12 @@ namespace AspnetRunBasics
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            #region add health check
+            services.AddHealthChecks()
+                    .AddUrlGroup(_ => new Uri(Configuration.GetValue<string>("WebShoppingHttpaggregatorUrlHC")), name: "WebShoppingHttpaggregatorUrlHC-check", tags: new string[] { "WebShoppingHttpaggregator" })
+                    .AddCheck("self", () => HealthCheckResult.Healthy());
+            #endregion
+
             #region database services
 
             services.AddHttpClient<ICatalogService, CatalogService>(c =>
@@ -58,6 +67,16 @@ namespace AspnetRunBasics
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
+                endpoints.MapHealthChecks("/hc", new HealthCheckOptions()
+                {
+                    Predicate = _ => true,
+                    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+                });
+
+                endpoints.MapHealthChecks("/liveness", new HealthCheckOptions
+                {
+                    Predicate = r => r.Name.Contains("self")
+                });
             });
         }
     }
