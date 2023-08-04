@@ -55,6 +55,12 @@ services:
       context: .
       dockerfile: WebApps/WebMVC/Dockerfile
 
+  webstatus:
+    image: ${DOCKER_REGISTRY-}webstatus
+    build:
+      context: .
+      dockerfile: WebApps/WebStatus/Dockerfile
+
 volumes:
   mongo_data:
   postgres_data:
