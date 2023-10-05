@@ -52,7 +52,7 @@ namespace Ordering.Application.Features.Orders.Commands.CheckoutOrder
 
             var newOrder = await _orderRepository.AddAsync(orderEntity);
 
-            _logger.LogInformation($"Order {newOrder.Id} is successfully created.");
+            _logger.LogInformation("Order {OrderId} is successfully created.", newOrder.Id);
             await SendMailAsync(newOrder);
             return newOrder.Id;
         }
@@ -67,7 +67,7 @@ namespace Ordering.Application.Features.Orders.Commands.CheckoutOrder
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Order {order.Id} failed due to an error with the mail service: {ex.Message}");
+                _logger.LogError("Order {OrderId} failed due to an error with the mail service: {ErrorMessage}", order.Id, ex.Message);
                 //await _orderRepository.DeleteAsync(order);
             }
         }
