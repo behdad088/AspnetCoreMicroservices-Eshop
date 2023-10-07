@@ -1,3 +1,4 @@
+using Eshop.BuildingBlocks.Logging;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -39,6 +40,9 @@ namespace AspnetRunBasics
                 c.BaseAddress = new Uri(Configuration["ApiSettings:GatewayAddress"]));
 
             #endregion
+
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            services.SetupLogging(appName: "WebMVC", environment: environment, elasticSearchConnectionString: Configuration.GetValue<string>("elasticSearchConnectionString"));
 
             services.AddRazorPages();
         }

@@ -145,6 +145,7 @@ services:
       - ASPNETCORE_URLS=http://0.0.0.0:80
       - ApiSettings__GatewayAddress=http://web.shopping.httpaggregator
       - WebShoppingHttpaggregatorUrlHC=http://web.shopping.httpaggregator/hc
+      - elasticSearchConnectionString=http://elasticsearch:9200
     ports:
       - "8004:80"
     depends_on:
