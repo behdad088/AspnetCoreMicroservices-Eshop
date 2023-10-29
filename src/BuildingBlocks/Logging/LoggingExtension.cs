@@ -16,7 +16,7 @@ namespace Eshop.BuildingBlocks.Logging
         public static void SetupLogging(this IServiceCollection services,
             string appName,
             string environment,
-            string elasticSearchConnectionString,
+            string? elasticSearchConnectionString,
             bool allowLoggingIntoFile = false,
             Dictionary<string, LogEventLevel>? minimumLevelOverrides = null)
         {
@@ -28,7 +28,7 @@ namespace Eshop.BuildingBlocks.Logging
             });
         }
 
-        private static Logger CreateLogger(string appName, string environment, string elasticSearchConnectionString, bool allowLoggingIntoFile, Dictionary<string, LogEventLevel> minimumLevelOverrides)
+        private static Logger CreateLogger(string appName, string environment, string? elasticSearchConnectionString, bool allowLoggingIntoFile, Dictionary<string, LogEventLevel>? minimumLevelOverrides)
         {
             var loggerConfiguration = CreateLoggerConfiguration(appName, environment, minimumLevelOverrides);
 
@@ -42,7 +42,7 @@ namespace Eshop.BuildingBlocks.Logging
             return logger;
         }
 
-        private static LoggerConfiguration CreateLoggerConfiguration(string appName, string environment, Dictionary<string, LogEventLevel> minimumLevelOverrides)
+        private static LoggerConfiguration CreateLoggerConfiguration(string appName, string environment, Dictionary<string, LogEventLevel>? minimumLevelOverrides)
         {
             var loggerConfiguration = new LoggerConfiguration()
                 .MinimumLevel.Debug()
