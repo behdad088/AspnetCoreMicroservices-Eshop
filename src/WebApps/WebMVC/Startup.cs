@@ -10,7 +10,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using WebMVC.Services;
 
-namespace AspnetRunBasics
+namespace WebMVC
 {
     public class Startup
     {

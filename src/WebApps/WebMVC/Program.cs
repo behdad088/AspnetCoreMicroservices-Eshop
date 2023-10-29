@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace AspnetRunBasics
+namespace WebMVC
 {
     public class Program
     {
