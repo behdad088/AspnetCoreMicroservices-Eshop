@@ -30,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\Logging\Logging.csproj" />
     <ProjectReference Include="..\..\Services.Common\Services.Common.csproj" />
   </ItemGroup>
 	
