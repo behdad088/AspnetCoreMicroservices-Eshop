@@ -2,6 +2,7 @@ using Catalog.API.Data;
 using Catalog.API.Extensions;
 using Catalog.API.Grpc;
 using Catalog.API.Repositories;
+using Eshop.BuildingBlocks.Logging;
 using Microsoft.OpenApi.Models;
 using Services.Common;
 
@@ -22,6 +23,9 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddHealthChecks(builder.Configuration);
 builder.Services.AddSingleton<ICatalogContext, CatalogContext>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
+var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
+builder.Services.SetupLogging(appName: "Catalog.API", environment: environment, elasticSearchConnectionString: builder.Configuration.GetValue<string>("elasticSearchConnectionString"));
 
 var app = builder.Build();
 app.MapDefaultHealthChecks();
