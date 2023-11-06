@@ -64,6 +64,7 @@ services:
       - "DatabaseSettings:ConnectionString=mongodb://catalogdb:27017"
       - Kestrel__Endpoints__HTTP__Url=http://0.0.0.0:80
       - Kestrel__Endpoints__GRPC__Url=http://0.0.0.0:81
+      - elasticSearchConnectionString=http://elasticsearch:9200
     depends_on:
       - catalogdb
     ports:
@@ -94,6 +95,7 @@ services:
       - "DatabaseSettings:ConnectionString=Server=discountdb;Port=5432;Database=DiscountDb;User Id=admin;Password=admin1234;"
       - Kestrel__Endpoints__HTTP__Url=http://0.0.0.0:80
       - Kestrel__Endpoints__GRPC__Url=http://0.0.0.0:81
+      - elasticSearchConnectionString=http://elasticsearch:9200
     depends_on:
       - discountdb
     ports:
@@ -108,6 +110,7 @@ services:
       - Kestrel__Endpoints__HTTP__Url=http://0.0.0.0:80
       - Kestrel__Endpoints__GRPC__Url=http://0.0.0.0:81
       - EventBusSettings__HostAddress=amqp://guest:guest@rabbitmq:5672
+      - elasticSearchConnectionString=http://elasticsearch:9200
     depends_on:
       - orderdb
       - rabbitmq
@@ -131,6 +134,7 @@ services:
       - Urls__GrpcBasket=http://basket.api:81
       - Urls__GrpcCatalog=http://catalog.api:81
       - Urls__GrpcOrdering=http://ordering.api:81
+      - elasticSearchConnectionString=http://elasticsearch:9200
     depends_on:
       - basket.api
       - catalog.api
