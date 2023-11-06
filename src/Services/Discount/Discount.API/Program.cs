@@ -1,6 +1,7 @@
 using Discount.API.Extensions;
 using Discount.API.Grpc;
 using Discount.API.Repositories;
+using Eshop.BuildingBlocks.Logging;
 using Services.Common;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,10 @@ builder.Services.AddScoped<IDiscountRepository>(sp =>
 {
     return new DiscountRepository(postgresConnectionString);
 });
+
+var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
+builder.Services.SetupLogging(appName: "Discount.API", environment: environment, elasticSearchConnectionString: builder.Configuration.GetValue<string>("elasticSearchConnectionString"));
+
 
 var app = builder.Build();
 app.MapDefaultHealthChecks();
