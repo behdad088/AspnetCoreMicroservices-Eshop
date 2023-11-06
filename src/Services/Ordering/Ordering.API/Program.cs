@@ -1,3 +1,4 @@
+using Eshop.BuildingBlocks.Logging;
 using Ordering.API.EventBusConsumer;
 using Ordering.API.Extensions;
 using Ordering.API.Grpc;
@@ -32,6 +33,11 @@ builder.Services.AddHealthChecks(builder.Configuration);
 builder.Services.AddRMQConnection(builder.Configuration.GetValue<string>("EventBusSettings:HostAddress"));
 builder.Services.AddRMQConsumer<BasketCheckoutConsumer>("uat", "order", "checkout");
 builder.Services.AddHostedService<BasketCheckoutConsumer>();
+
+var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
+builder.Services.SetupLogging(appName: "Ordering.API", environment: environment, elasticSearchConnectionString: builder.Configuration.GetValue<string>("elasticSearchConnectionString"));
+
+
 
 var app = builder.Build();
 app.MapDefaultHealthChecks();

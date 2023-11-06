@@ -1,3 +1,4 @@
+using Eshop.BuildingBlocks.Logging;
 using Services.Common;
 using Web.Shopping.HttpAggregator.Extensions;
 using Web.Shopping.HttpAggregator.Models.Config;
@@ -13,6 +14,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks(builder.Configuration);
 builder.Services.AddGrpcServices();
 builder.Services.Configure<UrlsConfig>(builder.Configuration.GetSection("urls"));
+
+var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
+builder.Services.SetupLogging(appName: "Web.Shopping.HttpAggregator", environment: environment, elasticSearchConnectionString: builder.Configuration.GetValue<string>("elasticSearchConnectionString"));
+
 
 var app = builder.Build();
 app.MapDefaultHealthChecks();
