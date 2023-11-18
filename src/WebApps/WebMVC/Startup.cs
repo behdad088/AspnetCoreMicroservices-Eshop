@@ -7,9 +7,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Extensions.Http;
-using Serilog;
 using System;
 using System.Net.Http;
 using WebMVC.Services;
@@ -28,6 +28,9 @@ namespace WebMVC
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            services.SetupLogging(appName: "WebMVC", environment: environment, elasticSearchConnectionString: Configuration.GetValue<string>("elasticSearchConnectionString"));
+
             #region add health check
             services.AddHealthChecks()
                     .AddUrlGroup(_ => new Uri(Configuration.GetValue<string>("WebShoppingHttpaggregatorUrlHC")), name: "WebShoppingHttpaggregatorUrlHC-check", tags: new string[] { "WebShoppingHttpaggregator" })
@@ -40,25 +43,22 @@ namespace WebMVC
             services.AddHttpClient<ICatalogService, CatalogService>(c =>
                 c.BaseAddress = new Uri(Configuration["ApiSettings:GatewayAddress"]))
                 .AddHttpMessageHandler<LoggingDelegatingHandler>()
-                .AddPolicyHandler(GetRetryPolicy())
+                .AddPolicyHandler(GetRetryPolicy(services))
                 .AddPolicyHandler(GetCircuitBreakerPolicy());
 
             services.AddHttpClient<IBasketService, BasketService>(c =>
                 c.BaseAddress = new Uri(Configuration["ApiSettings:GatewayAddress"]))
                 .AddHttpMessageHandler<LoggingDelegatingHandler>()
-                .AddPolicyHandler(GetRetryPolicy())
+                .AddPolicyHandler(GetRetryPolicy(services))
                 .AddPolicyHandler(GetCircuitBreakerPolicy());
 
             services.AddHttpClient<IOrderService, OrderService>(c =>
                 c.BaseAddress = new Uri(Configuration["ApiSettings:GatewayAddress"]))
-                .AddPolicyHandler(GetRetryPolicy())
+                .AddPolicyHandler(GetRetryPolicy(services))
                 .AddPolicyHandler(GetCircuitBreakerPolicy());
             // Dont want to add the LoggingDelegatingHandler to Order service since order contains some sensitive user data.
 
             #endregion
-
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-            services.SetupLogging(appName: "WebMVC", environment: environment, elasticSearchConnectionString: Configuration.GetValue<string>("elasticSearchConnectionString"));
 
             services.AddRazorPages();
         }
@@ -100,17 +100,20 @@ namespace WebMVC
             });
         }
 
-        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(IServiceCollection services)
         {
+            using var scope = services.BuildServiceProvider().CreateScope();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<Startup>>();
+
             return HttpPolicyExtensions
-                .HandleTransientHttpError()
-                .WaitAndRetryAsync(
-                    retryCount: 5,
-                    sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
-                    onRetry: (exception, retryCount, context) =>
-                    {
-                        Log.Error($"Retry {retryCount} of {context.PolicyKey} at {context.OperationKey}, due to: {exception}.");
-                    });
+            .HandleTransientHttpError()
+            .WaitAndRetryAsync(
+                retryCount: 5,
+                sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                onRetry: (exception, retryCount, context) =>
+                {
+                    logger.LogError($"Retry {retryCount} of {context.PolicyKey} at {context.OperationKey}, due to: {exception}.");
+                });
         }
 
         private static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
