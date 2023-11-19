@@ -15,20 +15,28 @@ namespace Ordering.API.Extensions
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<TContext>>();
             var context = scope.ServiceProvider.GetService<TContext>();
 
-            var policy = Policy.Handle<SocketException>()
+            try
+            {
+                var policy = Policy.Handle<SocketException>()
                    .Or<SqlException>()
                    .WaitAndRetry(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
                    {
-                       logger.LogError(ex, "An error occurred while migrating the database used on context {DbContextName}", typeof(TContext).Name);
+                       logger.LogError(ex, "An error occurred while migrating the database context {DbContextName}", typeof(TContext).Name);
                    }
                );
 
-            policy.Execute(() =>
+                policy.Execute(() =>
+                {
+                    logger.LogInformation("Migrate database associated with context {DbContextName} started.", typeof(TContext).Name);
+                    InvokeSeeder(seeder, context, scope.ServiceProvider);
+                    logger.LogInformation("Migrate database associated with context {DbContextName} finished.", typeof(TContext).Name);
+                });
+            }
+            catch (SqlException ex)
             {
-                logger.LogInformation("Migrating database associated with context {DbContextName} started.", typeof(TContext).Name);
-                InvokeSeeder(seeder, context, scope.ServiceProvider);
-                logger.LogInformation("Migrated database associated with context {DbContextName} finished.", typeof(TContext).Name);
-            });
+                logger.LogError(ex, "An error occurred while migrating the database context {DbContextName}", typeof(TContext).Name);
+            }
+
 
             return serviceCollection;
         }
