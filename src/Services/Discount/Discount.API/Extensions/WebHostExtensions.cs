@@ -13,28 +13,35 @@ namespace Discount.API.Extensions
             var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<TContext>>();
 
-            var policy = Policy.Handle<SocketException>()
+            try
+            {
+                logger.LogInformation("Migrate postresql database started.");
+
+                var policy = Policy.Handle<SocketException>()
                    .Or<NpgsqlException>()
                    .WaitAndRetry(retryCount, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
                    {
                        logger.LogError(ex, "An error occurred while migrating the postresql database, failed trying after {TimeOut}s", $"{time.TotalSeconds:n1}");
-                   }
-               );
+                   });
 
-            policy.Execute(() =>
+                policy.Execute(() =>
+                {
+                    var dbConnectionString = configuration.GetValue<string>("DatabaseSettings:ConnectionString");
+                    MigratePostgresDatabase(dbConnectionString);
+                    logger.LogInformation("Migrate postresql database finished.");
+                });
+            }
+            catch (NpgsqlException ex)
             {
-                MigratePostgresDatabase(configuration, logger);
-            });
+                logger.LogError(ex, "An error occurred while migrating the postresql database.");
+            }
 
             return serviceCollection;
         }
 
-        private static void MigratePostgresDatabase<TContext>(IConfiguration configuration, ILogger<TContext> logger)
+        private static void MigratePostgresDatabase(string? connectionString)
         {
-            logger.LogInformation("Migrating postresql database.");
-
-            using var connection = new NpgsqlConnection
-                (configuration.GetValue<string>("DatabaseSettings:ConnectionString"));
+            using var connection = new NpgsqlConnection(connectionString);
             connection.Open();
 
             using var command = new NpgsqlCommand
@@ -56,8 +63,6 @@ namespace Discount.API.Extensions
 
             command.CommandText = "INSERT INTO Coupon(ProductName, Description, Amount) VALUES('Samsung 10', 'Samsung Discount', 100);";
             command.ExecuteNonQuery();
-
-            logger.LogInformation("Migrated postresql database.");
         }
     }
 }
