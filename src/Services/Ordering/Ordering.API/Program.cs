@@ -37,8 +37,6 @@ builder.Services.AddHostedService<BasketCheckoutConsumer>();
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
 builder.Services.SetupLogging(appName: "Ordering.API", environment: environment, elasticSearchConnectionString: builder.Configuration.GetValue<string>("elasticSearchConnectionString"));
 
-
-
 var app = builder.Build();
 app.MapDefaultHealthChecks();
 // Configure the HTTP request pipeline.

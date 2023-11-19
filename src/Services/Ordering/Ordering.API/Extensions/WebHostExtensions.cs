@@ -11,9 +11,9 @@ namespace Ordering.API.Extensions
                                             Action<TContext, IServiceProvider> seeder) where TContext : DbContext
         {
             int retryCount = 7;
-            var services = serviceCollection.BuildServiceProvider();
-            var logger = services.GetRequiredService<ILogger<TContext>>();
-            var context = services.GetService<TContext>();
+            using var scope = serviceCollection.BuildServiceProvider().CreateScope();
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<TContext>>();
+            var context = scope.ServiceProvider.GetService<TContext>();
 
             var policy = Policy.Handle<SocketException>()
                    .Or<SqlException>()
@@ -25,9 +25,9 @@ namespace Ordering.API.Extensions
 
             policy.Execute(() =>
             {
-                logger.LogInformation("Migrating database associated with context {DbContextName}", typeof(TContext).Name);
-                InvokeSeeder(seeder, context, services);
-                logger.LogInformation("Migrated database associated with context {DbContextName}", typeof(TContext).Name);
+                logger.LogInformation("Migrating database associated with context {DbContextName} started.", typeof(TContext).Name);
+                InvokeSeeder(seeder, context, scope.ServiceProvider);
+                logger.LogInformation("Migrated database associated with context {DbContextName} finished.", typeof(TContext).Name);
             });
 
             return serviceCollection;
