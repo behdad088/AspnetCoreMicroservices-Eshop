@@ -66,6 +66,9 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.9.2
+   
+  grafana:
+    image: grafana/grafana-oss:latest
 
 volumes:
   mongo_data:
@@ -73,3 +76,4 @@ volumes:
   pgadmin_data:
   rabbitmq_data:
   elasticsearch-data:
+  grafana-data:
