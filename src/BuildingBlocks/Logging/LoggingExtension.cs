@@ -2,10 +2,12 @@
 using Newtonsoft.Json;
 using Serilog;
 using Serilog.Core;
+using Serilog.Enrichers.Span;
 using Serilog.Events;
 using Serilog.Exceptions;
 using Serilog.Formatting.Compact;
 using Serilog.Formatting.Elasticsearch;
+using Serilog.Formatting.Json;
 using Serilog.Sinks.Elasticsearch;
 using System.Globalization;
 
@@ -55,7 +57,9 @@ namespace Eshop.BuildingBlocks.Logging
                 .Enrich.FromLogContext()
                 .Enrich.WithProcessId()
                 .Enrich.WithExceptionDetails()
-                .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture);
+                .Enrich.WithSpan()
+                .Enrich.FromLogContext()
+                .WriteTo.Console(new JsonFormatter(renderMessage: true));
 
             if (minimumLevelOverrides != null && minimumLevelOverrides.Any())
                 foreach (var kv in minimumLevelOverrides)
@@ -71,7 +75,7 @@ namespace Eshop.BuildingBlocks.Logging
                 AutoRegisterTemplate = true,
                 AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
                 MinimumLogEventLevel = LogEventLevel.Information,
-                CustomFormatter = new EsPropertyTypeNamedFormatter()
+                //CustomFormatter = new EsPropertyTypeNamedFormatter()
             };
         }
 
