@@ -9,7 +9,8 @@ using Serilog.Formatting.Compact;
 using Serilog.Formatting.Elasticsearch;
 using Serilog.Formatting.Json;
 using Serilog.Sinks.Elasticsearch;
-using System.Globalization;
+using System.Diagnostics;
+using System.Web;
 
 namespace Eshop.BuildingBlocks.Logging
 {
@@ -58,6 +59,7 @@ namespace Eshop.BuildingBlocks.Logging
                 .Enrich.WithProcessId()
                 .Enrich.WithExceptionDetails()
                 .Enrich.WithSpan()
+                .Enrich.With<LogGrafanaUrlActivityEnricher>()
                 .Enrich.FromLogContext()
                 .WriteTo.Console(new JsonFormatter(renderMessage: true));
 
@@ -77,6 +79,27 @@ namespace Eshop.BuildingBlocks.Logging
                 MinimumLogEventLevel = LogEventLevel.Information,
                 //CustomFormatter = new EsPropertyTypeNamedFormatter()
             };
+        }
+
+        public class LogGrafanaUrlActivityEnricher : ILogEventEnricher
+        {
+            public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+            {
+                var activity = Activity.Current;
+                var traceId = activity?.GetTraceId();
+
+                if (!string.IsNullOrEmpty(traceId))
+                {
+                    var url = GetGrafanaUrl(traceId);
+                    logEvent.AddPropertyIfAbsent(new LogEventProperty("grafana_url", new ScalarValue(url)));
+                }
+            }
+
+            private static string GetGrafanaUrl(string traceId)
+            {
+                var url = HttpUtility.UrlEncode("http://localhost:3000/explore?schemaVersion=1&panes={\"vvs\":{\"queries\":[{\"query\":" + traceId + "}]} }");
+                return url;
+            }
         }
 
         /// <summary>
@@ -197,5 +220,4 @@ namespace Eshop.BuildingBlocks.Logging
                 return false;
         }
     }
-
 }
