@@ -62,11 +62,23 @@ services:
       dockerfile: WebApps/WebStatus/Dockerfile
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.12.0
-   
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+
+  metricbeat:
+    image: docker.elastic.co/beats/metricbeat:${STACK_VERSION}
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:${STACK_VERSION}
+  
+  logstash:
+    image: docker.elastic.co/logstash/logstash:${STACK_VERSION}
+
+  # fleet-server:
+  #   image: docker.elastic.co/beats/elastic-agent:${STACK_VERSION}
+
   grafana:
     image: grafana/grafana-oss:latest
 
@@ -77,3 +89,9 @@ volumes:
   rabbitmq_data:
   elasticsearch-data:
   grafana-data:
+  certs:
+  kibana-data:
+  metricbeat-data:
+  filebeat-data:
+  logstash-data:
+  # fleetserver-data:
