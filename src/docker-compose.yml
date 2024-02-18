@@ -76,11 +76,20 @@ services:
   logstash:
     image: docker.elastic.co/logstash/logstash:${STACK_VERSION}
 
-  # fleet-server:
-  #   image: docker.elastic.co/beats/elastic-agent:${STACK_VERSION}
-
   grafana:
-    image: grafana/grafana-oss:latest
+    image: grafana/grafana:10.2.3
+
+  prometheus:
+    image: prom/prometheus:v2.48.1
+
+  loki:
+    image: grafana/loki:2.9.3
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.91.0
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.52
 
 volumes:
   mongo_data:
@@ -94,4 +103,3 @@ volumes:
   metricbeat-data:
   filebeat-data:
   logstash-data:
-  # fleetserver-data:
