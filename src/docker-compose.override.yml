@@ -70,6 +70,10 @@ services:
       - Kestrel__Endpoints__HTTP__Url=http://0.0.0.0:80
       - Kestrel__Endpoints__GRPC__Url=http://0.0.0.0:81
       - elasticSearchConnectionString=http://elasticsearch:9200
+      - OTEL_EXPORTER_JAEGER_AGENT_HOST=jaeger
+      - OTEL_EXPORTER_JAEGER_AGENT_PORT=6831
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     depends_on:
       - catalogdb
     ports:
@@ -86,6 +90,10 @@ services:
       - Kestrel__Endpoints__GRPC__Url=http://0.0.0.0:81
       - EventBusSettings__HostAddress=amqp://guest:guest@rabbitmq:5672
       - elasticSearchConnectionString=http://elasticsearch:9200
+      - OTEL_EXPORTER_JAEGER_AGENT_HOST=jaeger
+      - OTEL_EXPORTER_JAEGER_AGENT_PORT=6831
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     depends_on:
       - basketdb
       - rabbitmq
@@ -101,6 +109,10 @@ services:
       - Kestrel__Endpoints__HTTP__Url=http://0.0.0.0:80
       - Kestrel__Endpoints__GRPC__Url=http://0.0.0.0:81
       - elasticSearchConnectionString=http://elasticsearch:9200
+      - OTEL_EXPORTER_JAEGER_AGENT_HOST=jaeger
+      - OTEL_EXPORTER_JAEGER_AGENT_PORT=6831
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     depends_on:
       - discountdb
     ports:
@@ -116,6 +128,10 @@ services:
       - Kestrel__Endpoints__GRPC__Url=http://0.0.0.0:81
       - EventBusSettings__HostAddress=amqp://guest:guest@rabbitmq:5672
       - elasticSearchConnectionString=http://elasticsearch:9200
+      - OTEL_EXPORTER_JAEGER_AGENT_HOST=jaeger
+      - OTEL_EXPORTER_JAEGER_AGENT_PORT=6831
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     depends_on:
       - orderdb
       - rabbitmq
@@ -140,6 +156,10 @@ services:
       - Urls__GrpcCatalog=http://catalog.api:81
       - Urls__GrpcOrdering=http://ordering.api:81
       - elasticSearchConnectionString=http://lasticsearch:9200
+      - OTEL_EXPORTER_JAEGER_AGENT_HOST=jaeger
+      - OTEL_EXPORTER_JAEGER_AGENT_PORT=6831
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     depends_on:
       - basket.api
       - catalog.api
@@ -157,6 +177,10 @@ services:
       - ApiSettings__GatewayAddress=http://web.shopping.httpaggregator
       - WebShoppingHttpaggregatorUrlHC=http://web.shopping.httpaggregator/hc
       - elasticSearchConnectionString=http://elasticsearch:9200
+      - OTEL_EXPORTER_JAEGER_AGENT_HOST=jaeger
+      - OTEL_EXPORTER_JAEGER_AGENT_PORT=6831
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     ports:
       - "8004:80"
     depends_on:
@@ -180,7 +204,11 @@ services:
       - HealthChecksUI__HealthChecks__4__Name=Web httpaggregator HTTP Check
       - HealthChecksUI__HealthChecks__4__Uri=http://web.shopping.httpaggregator/hc
       - HealthChecksUI__HealthChecks__5__Name=Webmvc HTTP Check
-      - HealthChecksUI__HealthChecks__5__Uri=http://webmvc/hc 
+      - HealthChecksUI__HealthChecks__5__Uri=http://webmvc/hc
+      - OTEL_EXPORTER_JAEGER_AGENT_HOST=jaeger
+      - OTEL_EXPORTER_JAEGER_AGENT_PORT=6831
+      - OTEL_EXPORTER_JAEGER_ENDPOINT=http://jaeger:14268/api/traces
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
     depends_on:
       - basket.api
       - discount.api
