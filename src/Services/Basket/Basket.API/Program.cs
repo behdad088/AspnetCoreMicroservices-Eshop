@@ -5,9 +5,58 @@ using Basket.API.Repositories;
 using Discount.Grpc.Protos;
 using Eshop.BuildingBlocks.Logging;
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Instrumentation.AspNetCore;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Services.Common;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
+
+const string serviceName = "eshop.basket.api";
+var telemetry = new ActivitySource(serviceName);
+builder.Services.AddSingleton(telemetry);
+var resourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName);
+
+builder.Logging
+    .AddOpenTelemetry(options =>
+    {
+        options.IncludeFormattedMessage = true;
+        options.IncludeScopes = true;
+
+        options.SetResourceBuilder(resourceBuilder);
+        options.AddOtlpExporter();
+    });
+
+builder.Services.Configure<AspNetCoreTraceInstrumentationOptions>(options =>
+{
+    // Filter out instrumentation of the Prometheus scraping endpoint.
+    options.Filter = ctx => ctx.Request.Path != "/metrics";
+});
+
+
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(b =>
+    {
+        b.AddService(serviceName);
+    })
+    .WithTracing(b => b
+        .SetResourceBuilder(resourceBuilder)
+        .AddAspNetCoreInstrumentation(options => options.RecordException = true)
+        .AddHttpClientInstrumentation(options => options.RecordException = true)
+        .AddEntityFrameworkCoreInstrumentation()
+        .AddSource(telemetry.Name)
+        .AddOtlpExporter())
+    .WithMetrics(b => b
+        .SetResourceBuilder(resourceBuilder)
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddRuntimeInstrumentation()
+        .AddProcessInstrumentation()
+        .AddPrometheusExporter());
+
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // Add services to the container.
 
@@ -43,6 +92,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
 app.UseAuthorization();
 app.MapGrpcService<BasketService>();
