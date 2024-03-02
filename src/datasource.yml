@@ -14,3 +14,19 @@ datasources:
     access: proxy
     uid: P8E80F9AEF21F6940
     url: http://loki:3100
+    jsonData:
+      derivedFields:
+      - datasourceUid: my-jaeger
+        matcherRegex: ((\d+|[a-z]+)(\d+|[a-z]+)(\d+|[a-z]+)(\d+|[a-z]+)(\d+|[a-z]+)(\d+|[a-z]+)(\d+|[a-z]+)(\d+|[a-z]+)(\d+|[a-z]+)(\d+|[a-z]+)(\d+|[a-z]+))
+        url: '$${__value.raw}'
+        name: TraceID
+      
+  - name: jaeger
+    type: jaeger
+    uid: my-jaeger
+    access: proxy
+    url: http://jaeger:16686
+    isDefault: false
+    version: 1
+    editable: true
+    basicAuth: false 

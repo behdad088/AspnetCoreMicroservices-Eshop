@@ -14,12 +14,15 @@ namespace Basket.API.Controllers
         private readonly IBasketRepository _repository;
         private readonly IRabbitMQProducer _rabbitMQProducer;
         private readonly DiscountProtoService.DiscountProtoServiceClient _discountProtoServiceClient;
+        private readonly ILogger<BasketController> _logger;
 
         public BasketController(
+            ILogger<BasketController> logger,
             IBasketRepository repository,
             DiscountProtoService.DiscountProtoServiceClient discountProtoServiceClient,
             IRabbitMQProducer rabbitMQProducer)
         {
+            _logger = logger;
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _discountProtoServiceClient = discountProtoServiceClient ?? throw new ArgumentNullException(nameof(discountProtoServiceClient));
             _rabbitMQProducer = rabbitMQProducer ?? throw new ArgumentNullException(nameof(rabbitMQProducer));
@@ -32,6 +35,7 @@ namespace Basket.API.Controllers
             if (string.IsNullOrEmpty(username))
                 return BadRequest("Username cannot be null or empty.");
 
+            _logger.LogInformation($"Getting basket for username {GetLogStringValue(username)}");
             var basket = await _repository.GetBasketAsync(username);
             return Ok(basket ?? new ShoppingCart(username));
         }
@@ -40,6 +44,7 @@ namespace Basket.API.Controllers
         [ProducesResponseType(typeof(ShoppingCart), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<ShoppingCart>> UpdateBasket([FromBody] ShoppingCart basket)
         {
+            _logger.LogInformation($"Updating basket for username {GetLogStringValue(basket.Username)}");
             foreach (var item in basket.Items)
             {
                 var discountResquest = new GetDiscountRequest() { ProductName = item.ProductName };
@@ -54,6 +59,7 @@ namespace Basket.API.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> DeleteBasket(string username)
         {
+            _logger.LogInformation($"Delete basket for username {GetLogStringValue(username)}");
             await _repository.DeleteBasketAsync(username);
             return Ok();
         }
@@ -68,12 +74,23 @@ namespace Basket.API.Controllers
             if (basket == null)
                 return BadRequest();
 
+            _logger.LogInformation($"checking out basket for username {GetLogStringValue(basketCheckout.Username)}");
             basketCheckout.TotalPrice = basket.TotalPrice;
             await _rabbitMQProducer.PublishAsJsonAsync("order.checkout", basketCheckout);
-
             await _repository.DeleteBasketAsync(basket.Username);
 
             return Accepted();
+        }
+
+        /// <summary>
+        /// Prevents Log Injection attacks
+        /// https://owasp.org/www-community/attacks/Log_Injection
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static string GetLogStringValue(string value)
+        {
+            return value.Replace(Environment.NewLine, "");
         }
     }
 }

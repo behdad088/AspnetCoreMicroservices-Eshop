@@ -33,7 +33,7 @@ namespace WebMVC
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            const string serviceName = "eshop.webmvc.api";
+            const string serviceName = "eshop.webmvc";
             var telemetry = new ActivitySource(serviceName);
             services.AddSingleton(telemetry);
             var resourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName);

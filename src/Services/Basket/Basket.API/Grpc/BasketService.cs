@@ -35,6 +35,7 @@ namespace Basket.API.Grpc
             if (string.IsNullOrEmpty(request.Username))
                 throw new RpcException(new Status(StatusCode.InvalidArgument, "Username cannot be null or empty."));
 
+            _logger.LogInformation($"Getting basket for username {request.Username}");
             var basket = await _repository.GetBasketAsync(request.Username);
             basket ??= new ShoppingCart(request.Username);
             _logger.LogInformation("Basket is retrieved for Username : {Username}", request.Username);
@@ -45,6 +46,7 @@ namespace Basket.API.Grpc
 
         public override async Task<ShoppingCartModel> UpdateBasket(UpdateBasketRequest request, ServerCallContext context)
         {
+            _logger.LogInformation($"Updating basket for username {request.ShoppingCart.Username}");
             var ShoppingCartItems = request.ShoppingCart.Items.ToList();
 
             foreach (var item in ShoppingCartItems)
@@ -62,6 +64,7 @@ namespace Basket.API.Grpc
 
         public override async Task<NoResponse> DeletetBasket(DeletetBasketRequest request, ServerCallContext context)
         {
+            _logger.LogInformation($"Delete basket for username {request.Username}");
             await _repository.DeleteBasketAsync(request.Username);
             return new NoResponse();
         }
@@ -72,6 +75,7 @@ namespace Basket.API.Grpc
             if (basket == null)
                 throw new RpcException(new Status(StatusCode.NotFound, "Basket not found."));
 
+            _logger.LogInformation($"checking out basket for username {request.Username}");
             request.TotalPrice = (double)basket.TotalPrice;
             var basketCheckout = _mapper.Map<BasketCheckout>(request);
 

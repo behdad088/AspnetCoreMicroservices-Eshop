@@ -56,6 +56,8 @@ namespace Discount.API.Grpc
 
         public override async Task<DeleteDiscountResponse> DeleteDiscount(DeleteDiscountRequest request, ServerCallContext context)
         {
+            _logger.LogInformation($"Delete discount for the prodcut {request.ProductName}");
+
             var deleted = await _repository.DeleteDiscountAsync(request.ProductName);
             var response = new DeleteDiscountResponse
             {
