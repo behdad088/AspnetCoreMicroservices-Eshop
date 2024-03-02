@@ -22,7 +22,7 @@ namespace Discount.API.Controllers
         [ProducesResponseType(typeof(Coupon), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<Coupon>> GetDiscount(string productName)
         {
-            _logger.LogInformation($"Getting discount for the prodcut {productName}");
+            _logger.LogInformation($"Getting discount for the prodcut {GetLogStringValue(productName)}");
             var coupon = await _repository.GetDiscountAsync(productName);
             return Ok(coupon);
         }
@@ -31,7 +31,7 @@ namespace Discount.API.Controllers
         [ProducesResponseType(typeof(Coupon), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<Coupon>> CreateDiscount([FromBody] Coupon coupon)
         {
-            _logger.LogInformation($"Create discount for the prodcut {coupon.ProductName}");
+            _logger.LogInformation($"Create discount for the prodcut {GetLogStringValue(coupon.ProductName)}");
             await _repository.CreateDiscountAsync(coupon);
             return CreatedAtRoute("GetDiscount", new { productName = coupon.ProductName }, coupon);
         }
@@ -40,7 +40,7 @@ namespace Discount.API.Controllers
         [ProducesResponseType(typeof(Coupon), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<Coupon>> UpdateDiscount([FromBody] Coupon coupon)
         {
-            _logger.LogInformation($"Update discount for the prodcut {coupon.ProductName}");
+            _logger.LogInformation($"Update discount for the prodcut {GetLogStringValue(coupon.ProductName)}");
             return Ok(await _repository.UpdateDiscountAsync(coupon));
         }
 
@@ -48,8 +48,19 @@ namespace Discount.API.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<bool>> DeleteDiscount(string productName)
         {
-            _logger.LogInformation($"Delete discount for the prodcut {productName}");
+            _logger.LogInformation($"Delete discount for the prodcut {GetLogStringValue(productName)}");
             return Ok(await _repository.DeleteDiscountAsync(productName));
+        }
+
+        /// <summary>
+        /// Prevents Log Injection attacks
+        /// https://owasp.org/www-community/attacks/Log_Injection
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static string GetLogStringValue(string value)
+        {
+            return value.Replace(Environment.NewLine, "");
         }
     }
 }
