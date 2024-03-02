@@ -21,6 +21,7 @@ namespace Catalog.API.Grpc
 
         public override async Task<GetProductsResponse> GetProducts(NoRequest request, ServerCallContext context)
         {
+            _logger.LogInformation("Getting the list of all the products.");
             var products = await _repository.GetProductsAsync();
             var productModels = _mapper.Map<List<ProductModel>>(products);
             var result = new GetProductsResponse();
@@ -30,6 +31,8 @@ namespace Catalog.API.Grpc
 
         public override async Task<ProductModel> GetProductById(GetProductByIdRequest request, ServerCallContext context)
         {
+            _logger.LogInformation("Getting product with Id={ProductId}.", request.Id);
+
             var product = await _repository.GetProductAsync(request.Id);
 
             if (product == null)
@@ -41,6 +44,8 @@ namespace Catalog.API.Grpc
 
         public override async Task<GetProductByCategoryResponse> GetProductByCategory(GetProductByCategoryRequest request, ServerCallContext context)
         {
+            _logger.LogInformation("Getting the list of all the products for Category={category}", request.Category);
+
             var products = await _repository.GetProductByCategoryAsync(request.Category);
             var productModels = _mapper.Map<List<ProductModel>>(products);
             var result = new GetProductByCategoryResponse();
@@ -50,6 +55,7 @@ namespace Catalog.API.Grpc
 
         public override async Task<ProductModel> CreateProduct(CreateProductRequest request, ServerCallContext context)
         {
+            _logger.LogInformation($"Cearting product: {request.Product}");
             var product = _mapper.Map<Product>(request.Product);
             await _repository.CreateProductAsync(product);
 
@@ -59,6 +65,7 @@ namespace Catalog.API.Grpc
 
         public override async Task<UpdateProductResponse> UpdateProduct(UpdateProductRequest request, ServerCallContext context)
         {
+            _logger.LogInformation($"Updating product {request.Product}");
             var product = _mapper.Map<Product>(request.Product);
             var result = await _repository.UpdateProductAsync(product);
             return new UpdateProductResponse() { Result = result };
@@ -66,6 +73,7 @@ namespace Catalog.API.Grpc
 
         public override async Task<DeleteProductIdResponse> DeleteProductById(DeleteProductIdRequest request, ServerCallContext context)
         {
+            _logger.LogInformation($"Deleting product with Id {request.Id}");
             var result = await _repository.DeleteProductAsync(request.Id);
             return new DeleteProductIdResponse() { Result = result };
         }

@@ -97,8 +97,9 @@ namespace Eshop.BuildingBlocks.Logging
 
             private static string GetGrafanaUrl(string traceId)
             {
-                var url = HttpUtility.UrlEncode("http://localhost:3000/explore?schemaVersion=1&panes={\"vvs\":{\"queries\":[{\"query\":" + traceId + "}]} }");
-                return url;
+                var baseUrl = "http://localhost:3000/explore?schemaVersion=1&panes=";
+                var query = HttpUtility.UrlEncode("{\"vvs\":{\"queries\":[{\"query\":" + traceId + "}]}}");
+                return baseUrl + query;
             }
         }
 

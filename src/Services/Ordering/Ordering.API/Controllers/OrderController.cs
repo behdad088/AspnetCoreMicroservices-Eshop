@@ -13,16 +13,19 @@ namespace Ordering.API.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private readonly ILogger<OrderController> _logger;
 
-        public OrderController(IMediator mediator)
+        public OrderController(IMediator mediator, ILogger<OrderController> logger)
         {
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpGet("{username}", Name = "GetOrder")]
         [ProducesResponseType(typeof(IEnumerable<OrdersVm>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IEnumerable<OrdersVm>>> GetOrdersByUsernameAsync(string username)
         {
+            _logger.LogInformation($"Getting order for username {username}");
             var query = new GetOrdersListQuery(username);
             var orders = await _mediator.Send(query);
             return Ok(orders);
@@ -32,6 +35,7 @@ namespace Ordering.API.Controllers
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<ActionResult<int>> CheckoutOrderAsync([FromBody] CheckoutOrderCommand command)
         {
+            _logger.LogInformation($"Checking out orders for username {command.Username}");
             var result = await _mediator.Send(command);
             return Ok(result);
         }
@@ -42,6 +46,7 @@ namespace Ordering.API.Controllers
         [ProducesDefaultResponseType]
         public async Task<ActionResult> UpdateOrder([FromBody] UpdateOrderCommand command)
         {
+            _logger.LogInformation($"Update orders for username {command.Username}");
             await _mediator.Send(command);
             return NoContent();
         }
@@ -52,6 +57,7 @@ namespace Ordering.API.Controllers
         [ProducesDefaultResponseType]
         public async Task<ActionResult> DeleteOrder(int id)
         {
+            _logger.LogInformation($"Delete order with id {id}");
             var command = new DeleteOrderCommand(id);
             await _mediator.Send(command);
             return NoContent();
