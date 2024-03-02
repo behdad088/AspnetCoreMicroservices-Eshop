@@ -35,7 +35,7 @@ namespace Catalog.API.Controllers
             if (string.IsNullOrEmpty(id))
                 return BadRequest("Product Id cannot be null or empty.");
 
-            _logger.LogInformation("Getting product with Id={ProductId}.", id);
+            _logger.LogInformation("Getting product with Id={ProductId}.", GetLogStringValue(id));
 
             var product = await _repository.GetProductAsync(id);
             if (product == null)
@@ -83,7 +83,7 @@ namespace Catalog.API.Controllers
             if (string.IsNullOrEmpty(id))
                 return BadRequest("Product Id cannot be null or empty.");
 
-            _logger.LogInformation($"Deleting product with Id {id}");
+            _logger.LogInformation($"Deleting product with Id {GetLogStringValue(id)}");
             return Ok(await _repository.DeleteProductAsync(id));
         }
 
