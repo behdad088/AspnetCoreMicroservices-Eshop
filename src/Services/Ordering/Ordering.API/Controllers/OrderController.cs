@@ -25,7 +25,7 @@ namespace Ordering.API.Controllers
         [ProducesResponseType(typeof(IEnumerable<OrdersVm>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IEnumerable<OrdersVm>>> GetOrdersByUsernameAsync(string username)
         {
-            _logger.LogInformation($"Getting order for username {username}");
+            _logger.LogInformation($"Getting order for username {GetLogStringValue(username)}");
             var query = new GetOrdersListQuery(username);
             var orders = await _mediator.Send(query);
             return Ok(orders);
@@ -35,7 +35,7 @@ namespace Ordering.API.Controllers
         [ProducesResponseType((int)HttpStatusCode.OK)]
         public async Task<ActionResult<int>> CheckoutOrderAsync([FromBody] CheckoutOrderCommand command)
         {
-            _logger.LogInformation($"Checking out orders for username {command.Username}");
+            _logger.LogInformation($"Checking out orders for username {GetLogStringValue(command.Username)}");
             var result = await _mediator.Send(command);
             return Ok(result);
         }
@@ -46,7 +46,7 @@ namespace Ordering.API.Controllers
         [ProducesDefaultResponseType]
         public async Task<ActionResult> UpdateOrder([FromBody] UpdateOrderCommand command)
         {
-            _logger.LogInformation($"Update orders for username {command.Username}");
+            _logger.LogInformation($"Update orders for username {GetLogStringValue(command.Username)}");
             await _mediator.Send(command);
             return NoContent();
         }
@@ -61,6 +61,17 @@ namespace Ordering.API.Controllers
             var command = new DeleteOrderCommand(id);
             await _mediator.Send(command);
             return NoContent();
+        }
+
+        /// <summary>
+        /// Prevents Log Injection attacks
+        /// https://owasp.org/www-community/attacks/Log_Injection
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        private static string GetLogStringValue(string value)
+        {
+            return value.Replace(Environment.NewLine, "");
         }
     }
 }

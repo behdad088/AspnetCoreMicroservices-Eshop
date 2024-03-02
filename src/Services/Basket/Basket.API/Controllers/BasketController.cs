@@ -44,7 +44,7 @@ namespace Basket.API.Controllers
         [ProducesResponseType(typeof(ShoppingCart), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<ShoppingCart>> UpdateBasket([FromBody] ShoppingCart basket)
         {
-            _logger.LogInformation($"Updating basket for username {basket.Username}");
+            _logger.LogInformation($"Updating basket for username {GetLogStringValue(basket.Username)}");
             foreach (var item in basket.Items)
             {
                 var discountResquest = new GetDiscountRequest() { ProductName = item.ProductName };
