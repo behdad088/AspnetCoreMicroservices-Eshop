@@ -6,6 +6,7 @@ using Discount.Grpc.Protos;
 using Eshop.BuildingBlocks.EventBus.RabbitMQ.Abstractions;
 using Grpc.Core;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace Basket.API.Tests
     {
         private readonly Mock<IBasketRepository> _basketRepositoryMock;
         private readonly Mock<IRabbitMQProducer> _rabbitMQProducerMock;
+        private readonly Mock<ILogger<BasketController>> _logger;
         private readonly Mock<DiscountProtoService.DiscountProtoServiceClient> _discountProtoServiceClientMock;
 
         public BasketControllerTests()
@@ -26,6 +28,7 @@ namespace Basket.API.Tests
             _basketRepositoryMock = new Mock<IBasketRepository>();
             _rabbitMQProducerMock = new Mock<IRabbitMQProducer>();
             _discountProtoServiceClientMock = new Mock<DiscountProtoService.DiscountProtoServiceClient>();
+            _logger = new Mock<ILogger<BasketController>>();
         }
 
         [Fact]
@@ -33,7 +36,7 @@ namespace Basket.API.Tests
         {
             // Arrange
             var username = string.Empty;
-            var controller = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
+            var controller = new BasketController(_logger.Object, _basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
 
             // Act
             var actual = await controller.GetBasket(username);
@@ -48,7 +51,7 @@ namespace Basket.API.Tests
             // Arrange
             var username = "test";
             _basketRepositoryMock.Setup(x => x.GetBasketAsync(It.IsAny<string>())).ReturnsAsync(() => null);
-            var controller = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
+            var controller = new BasketController(_logger.Object, _basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
 
             // Act
             var actual = await controller.GetBasket(username);
@@ -81,7 +84,7 @@ namespace Basket.API.Tests
                 .Returns(discountMockCall);
 
             _basketRepositoryMock.Setup(x => x.UpdateBasketAsync(It.IsAny<ShoppingCart>())).ReturnsAsync(basket);
-            var controller = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
+            var controller = new BasketController(_logger.Object, _basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
 
             // Act
             var actual = await controller.UpdateBasket(basket);
@@ -103,7 +106,7 @@ namespace Basket.API.Tests
                 Username = "test",
             };
             _basketRepositoryMock.Setup(x => x.GetBasketAsync(It.IsAny<string>())).ReturnsAsync(() => null);
-            var controller = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
+            var controller = new BasketController(_logger.Object, _basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
 
             // Act 
             var actual = await controller.Checkout(basket);
@@ -135,7 +138,7 @@ namespace Basket.API.Tests
                 }
             });
 
-            var controller = new BasketController(_basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
+            var controller = new BasketController(_logger.Object, _basketRepositoryMock.Object, _discountProtoServiceClientMock.Object, _rabbitMQProducerMock.Object);
             _rabbitMQProducerMock.Setup(x => x.PublishAsJsonAsync(It.IsAny<string>(), It.IsAny<object>()));
             _basketRepositoryMock.Setup(x => x.DeleteBasketAsync(It.IsAny<string>()));
 
