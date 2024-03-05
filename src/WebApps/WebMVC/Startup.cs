@@ -8,14 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using Polly;
 using Polly.Extensions.Http;
+using Services.Common;
 using System;
-using System.Diagnostics;
 using System.Net.Http;
 using WebMVC.Services;
 
@@ -34,32 +30,11 @@ namespace WebMVC
         public void ConfigureServices(IServiceCollection services)
         {
             const string serviceName = "eshop.webmvc";
-            var telemetry = new ActivitySource(serviceName);
-            services.AddSingleton(telemetry);
-            var resourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName);
 
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
             services.SetupLogging(appName: "WebMVC", environment: environment, elasticSearchConnectionString: Configuration.GetValue<string>("elasticSearchConnectionString"));
 
-            services.AddOpenTelemetry()
-            .ConfigureResource(b =>
-            {
-                b.AddService(serviceName);
-            })
-            .WithTracing(b => b
-                .SetResourceBuilder(resourceBuilder)
-                .AddAspNetCoreInstrumentation(options => options.RecordException = true)
-                .AddHttpClientInstrumentation(options => options.RecordException = true)
-                .AddEntityFrameworkCoreInstrumentation()
-                .AddSource(telemetry.Name)
-                .AddOtlpExporter())
-            .WithMetrics(b => b
-                .SetResourceBuilder(resourceBuilder)
-                .AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddRuntimeInstrumentation()
-                .AddProcessInstrumentation()
-                .AddPrometheusExporter());
+            services.AddOpenTelemetryOtl(serviceName);
 
             #region add health check
             services.AddHealthChecks()

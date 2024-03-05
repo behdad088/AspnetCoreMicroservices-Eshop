@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -9,8 +9,16 @@
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" Version="6.0.2" />
     <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="6.0.5" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+	  <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.7.0" />
+	  <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.7.0-rc.1" />
+	  <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.7.0" />
+	  <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.7.0" />
+	  <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.8" />
+	  <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.7.0" />
+	  <PackageReference Include="OpenTelemetry.Instrumentation.Process" Version="0.5.0-beta.3" />
+	  <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.5.1" />
   </ItemGroup>
 
   <ItemGroup>

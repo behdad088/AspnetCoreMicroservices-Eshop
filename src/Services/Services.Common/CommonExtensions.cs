@@ -9,6 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using NodaTime;
+using OpenTelemetry.Instrumentation.AspNetCore;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using RabbitMQ.Client;
 
 namespace Services.Common
@@ -94,6 +99,59 @@ namespace Services.Common
             {
                 Predicate = r => r.Name.Contains("self")
             });
+        }
+
+        /// <summary>
+        /// Adds Open Telemetry metrics, tracing and logging
+        /// </summary>
+        /// <param name="service"></param>
+        /// <param name="serviceName"></param>
+        public static void AddOpenTelemetryOtl(this IServiceCollection service, string serviceName)
+        {
+            service.AddSingleton(sp =>
+            {
+                return new DiagnosticsConfig(serviceName);
+            });
+
+            using var scope = service.BuildServiceProvider().CreateScope();
+            var diagnosticsConfig = scope.ServiceProvider.GetRequiredService<DiagnosticsConfig>();
+            var resourceBuilder = ResourceBuilder.CreateDefault().AddService(serviceName);
+
+            service.Configure<AspNetCoreTraceInstrumentationOptions>(options =>
+            {
+                // Filter out instrumentation of the Prometheus scraping endpoint.
+                options.Filter = ctx => ctx.Request.Path != "/metrics";
+            });
+
+            service.AddOpenTelemetry()
+            .ConfigureResource(b =>
+            {
+                b.AddService(serviceName);
+            })
+            .WithTracing(b => b
+                .SetResourceBuilder(resourceBuilder)
+                .AddAspNetCoreInstrumentation(options => options.RecordException = true)
+                .AddHttpClientInstrumentation(options => options.RecordException = true)
+                .AddEntityFrameworkCoreInstrumentation()
+                .AddSource(diagnosticsConfig.Tracing.Name)
+                .AddOtlpExporter())
+            .WithMetrics(b => b
+                .AddMeter(diagnosticsConfig.Metrics.Name)
+                .SetResourceBuilder(resourceBuilder)
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddRuntimeInstrumentation()
+                .AddProcessInstrumentation()
+                .AddPrometheusExporter());
+
+            service.AddLogging(x => x.AddOpenTelemetry(options =>
+            {
+                options.IncludeFormattedMessage = true;
+                options.IncludeScopes = true;
+
+                options.SetResourceBuilder(resourceBuilder);
+                options.AddOtlpExporter();
+            }));
         }
     }
 }
