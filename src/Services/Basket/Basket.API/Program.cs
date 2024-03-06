@@ -31,8 +31,8 @@ builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(
     option.Address = new Uri(discountUrl);
 });
 
-builder.Services.AddRMQConnection(builder.Configuration.GetValue<string>("EventBusSettings:HostAddress")!);
-builder.Services.AddRMQProducer("uat", "order", "checkout");
+builder.Services.AddRmqConnection(builder.Configuration.GetValue<string>("EventBusSettings:HostAddress")!);
+builder.Services.AddRmqProducer("uat", "order", "checkout");
 
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
 builder.Services.SetupLogging(appName: "Basket.API", environment: environment, elasticSearchConnectionString: builder.Configuration.GetValue<string>("elasticSearchConnectionString"));

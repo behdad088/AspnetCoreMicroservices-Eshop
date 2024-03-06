@@ -20,7 +20,7 @@ namespace Services.Common
 {
     public static class CommonExtensions
     {
-        public static IServiceCollection AddRMQConnection(this IServiceCollection services, string connectionString)
+        public static IServiceCollection AddRmqConnection(this IServiceCollection services, string connectionString)
         {
             var factory = new ConnectionFactory()
             {
@@ -37,33 +37,27 @@ namespace Services.Common
             return services;
         }
 
-        public static IServiceCollection AddRMQConsumer<T>(this IServiceCollection services, string environment, string service, string consumerName)
+        public static IServiceCollection AddRmqConsumer<T>(this IServiceCollection services, string environment, string service, string consumerName)
         {
-            services.AddSingleton<IRabbitMQConsumer<T>>(sp =>
-            {
-                return new RabbitMQConsumer<T>(
-                    rabbitMQPersistentConnection: sp.GetRequiredService<IRabbitMQPersistentConnection>(),
-                    service: service,
-                    environment: environment,
-                    consumerName: consumerName,
-                    logger: sp.GetRequiredService<ILogger<RabbitMQConsumer<T>>>());
-            });
+            services.AddSingleton<IRabbitMQConsumer<T>>(sp => new RabbitMQConsumer<T>(
+                rabbitMQPersistentConnection: sp.GetRequiredService<IRabbitMQPersistentConnection>(),
+                service: service,
+                environment: environment,
+                consumerName: consumerName,
+                logger: sp.GetRequiredService<ILogger<RabbitMQConsumer<T>>>()));
 
             return services;
         }
 
-        public static IServiceCollection AddRMQProducer(this IServiceCollection services, string environment, string service, string name)
+        public static IServiceCollection AddRmqProducer(this IServiceCollection services, string environment, string service, string name)
         {
-            services.AddSingleton<IRabbitMQProducer>(sp =>
-            {
-                return new RabbitMQProducer(
-                    rabbitMQPersistentConnection: sp.GetRequiredService<IRabbitMQPersistentConnection>(),
-                    logger: sp.GetRequiredService<ILogger<RabbitMQProducer>>(),
-                    clock: SystemClock.Instance,
-                    service: service,
-                    environment: environment,
-                    name: name);
-            });
+            services.AddSingleton<IRabbitMQProducer>(sp => new RabbitMQProducer(
+                rabbitMQPersistentConnection: sp.GetRequiredService<IRabbitMQPersistentConnection>(),
+                logger: sp.GetRequiredService<ILogger<RabbitMQProducer>>(),
+                clock: SystemClock.Instance,
+                service: service,
+                environment: environment,
+                name: name));
 
             return services;
         }
@@ -108,10 +102,7 @@ namespace Services.Common
         /// <param name="serviceName"></param>
         public static void AddOpenTelemetryOtl(this IServiceCollection service, string serviceName)
         {
-            service.AddSingleton(sp =>
-            {
-                return new DiagnosticsConfig(serviceName);
-            });
+            service.AddSingleton(_ => new DiagnosticsConfig(serviceName));
 
             using var scope = service.BuildServiceProvider().CreateScope();
             var diagnosticsConfig = scope.ServiceProvider.GetRequiredService<DiagnosticsConfig>();

@@ -34,8 +34,8 @@ builder.Services.AddGrpc();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks(builder.Configuration);
-builder.Services.AddRMQConnection(builder.Configuration.GetValue<string>("EventBusSettings:HostAddress"));
-builder.Services.AddRMQConsumer<BasketCheckoutConsumer>("uat", "order", "checkout");
+builder.Services.AddRmqConnection(builder.Configuration.GetValue<string>("EventBusSettings:HostAddress"));
+builder.Services.AddRmqConsumer<BasketCheckoutConsumer>("uat", "order", "checkout");
 builder.Services.AddHostedService<BasketCheckoutConsumer>();
 
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
