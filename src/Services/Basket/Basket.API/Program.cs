@@ -1,10 +1,12 @@
 using Basket.API.Extensions;
 using Basket.API.Grpc;
 using Basket.API.Models.Configs;
+using Basket.API.Observability;
 using Basket.API.Repositories;
 using Discount.Grpc.Protos;
 using Eshop.BuildingBlocks.Logging;
 using Microsoft.Extensions.Options;
+using OpenTelemetry.Trace;
 using Services.Common;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +35,15 @@ builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(
 
 builder.Services.AddRmqConnection(builder.Configuration.GetValue<string>("EventBusSettings:HostAddress")!);
 builder.Services.AddRmqProducer("uat", "order", "checkout");
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddSingleton<TenantIdProcessor>();
+builder.Services.ConfigureOpenTelemetryTracerProvider(
+        (serviceProvider, traceProviderBuilder) =>
+        {
+            traceProviderBuilder.AddProcessor(serviceProvider.GetRequiredService<TenantIdProcessor>());
+        });
 
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")!;
 builder.Services.SetupLogging(appName: "Basket.API", environment: environment, elasticSearchConnectionString: builder.Configuration.GetValue<string>("elasticSearchConnectionString"));
