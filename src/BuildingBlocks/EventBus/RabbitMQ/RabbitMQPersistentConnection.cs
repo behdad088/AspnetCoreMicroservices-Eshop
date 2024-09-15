@@ -34,6 +34,13 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
 
         public async Task DeclareQueueAsync(string name, bool durable, bool exclusive, bool autoDelete, IDictionary<string, object>? arguments)
         {
+            var dlqRoutingKey = await CreateDeadLetterQueue(name);
+            arguments = new Dictionary<string, object>
+            {
+                { "x-dead-letter-exchange", "DlqExchange" },
+                { "x-dead-letter-routing-key", dlqRoutingKey }
+            };
+
             using var channel = await CreateModelAsync();
             var response = channel.QueueDeclare(queue: name, durable: durable, exclusive: exclusive, autoDelete: autoDelete, arguments: arguments);
             _logger?.LogInformation("RMQ queue {QueueName} is declared. It has {Value1} messages and {Value2} consumers.", name, response.MessageCount, response.ConsumerCount);
@@ -44,6 +51,18 @@ namespace Eshop.BuildingBlocks.EventBus.RabbitMQ
             using var channel = await CreateModelAsync();
             channel.QueueBind(queue: queueName, exchange: exchangeName, routingKey: routingKey, arguments: arguments);
             _logger?.LogInformation("RMQ queue {QueueName} is bound to exchange {ExchangeName} by routing key {RoutingKey}.", queueName, exchangeName, routingKey);
+        }
+
+        private async Task<string> CreateDeadLetterQueue(string name)
+        {
+            var dlqExchange = "DlqExchange";
+            var dlq = string.Format("{0}.{1}", name, "dlq");
+            var dlqRoutingKey = string.Format("{0}.{1}#", name, "dlq");
+            using var channel = await CreateModelAsync();
+            channel.ExchangeDeclare(exchange: dlqExchange, type: ExchangeType.Topic, durable: false, autoDelete: false, arguments: null);
+            var response = channel.QueueDeclare(queue: dlq, durable: false, exclusive: false, autoDelete: false, arguments: null);
+            channel.QueueBind(queue: dlq, exchange: dlqExchange, routingKey: dlqRoutingKey, arguments: null);
+            return dlqRoutingKey;
         }
 
         public async Task<IModel> CreateModelAsync()

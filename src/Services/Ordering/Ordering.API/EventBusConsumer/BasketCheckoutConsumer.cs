@@ -51,7 +51,7 @@ namespace Ordering.API.EventBusConsumer
             catch (Exception e)
             {
                 _logger.LogWarning(e, "Something went wrong when deserialize message body with {Id}", eventMessage.MessageId);
-                return ActMode.Ack;
+                return ActMode.NackWithoutRequeue;
             }
 
             try

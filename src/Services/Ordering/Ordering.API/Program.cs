@@ -19,13 +19,13 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // Add Migration
-builder.Services.MigrateDatabase<OrderContext>((context, services) =>
-{
-    var logger = services.GetService<ILogger<OrderContextSeed>>();
-    OrderContextSeed
-        .SeedAsync(context, logger)
-        .Wait();
-});
+//builder.Services.MigrateDatabase<OrderContext>((context, services) =>
+//{
+//    var logger = services.GetService<ILogger<OrderContextSeed>>();
+//    OrderContextSeed
+//        .SeedAsync(context, logger)
+//        .Wait();
+//});
 
 
 builder.Services.AddControllers();
